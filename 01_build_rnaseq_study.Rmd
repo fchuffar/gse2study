@@ -1,0 +1,183 @@
+---
+title: "Build RNA-seq study"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+genes = readRDS("~/projects/genes/bed_grch38_epimeddb.rds")
+gse = "GSE57397"
+study_filename = paste0("study_", gse, ".rds")
+```
+
+# Data
+
+Data matrix is compute from fastq files:
+
+  * aligned on hg19 genome (UCSC) using STAR
+  * counts are computed using `htseq-count`
+  * normalization is done by DESeq2.
+  
+Full epimedtools study `s` is exported as `r study_filename`.
+
+It includes following matrix of counts are exported as:
+  * `s$stuffs$raw_counts`
+  * `s$stuffs$rpkm_norm_counts`
+  * `s$stuffs$deseq_norm_counts`
+  
+```{r}
+# print("# stranded or not?")
+# srr = "SRR1274638"
+# foo_no = read.table(paste0("~/projects/datashare/", gse, "/", srr, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"     ))[,2]
+# foo_re = read.table(paste0("~/projects/datashare/", gse, "/", srr, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"))[,2]
+# foo_ye = read.table(paste0("~/projects/datashare/", gse, "/", srr, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"    ))[,2]
+# plot(log2(foo_re), log2(foo_ye))
+# abline(0,1, col=2)
+
+print("# build raw counts")
+count_files = list.files(paste0("~/projects/datashare/", gse), "notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt", full.names=TRUE)  
+if (!file.exists("raw_counts.rds")) {
+  raw_counts = sapply(unlist(count_files), function(cnt_filename){
+    foo = read.table(cnt_filename)
+    rownames(foo) = foo[,1]
+    bar = foo[,2]
+    names(bar) = rownames(foo)
+    return(bar)
+    # foo[,1] = NULL
+    # return(foo)
+  })
+  colnames(raw_counts) = do.call(rbind, strsplit(do.call(rbind, strsplit(unlist(count_files), "/"))[,7], "_"))[,1]
+  raw_counts = raw_counts[-((nrow(raw_counts)-4):nrow(raw_counts)),]
+  head(raw_counts)
+  tail(raw_counts)
+  dim(raw_counts)
+  saveRDS(raw_counts, "raw_counts.rds")
+}
+raw_counts = readRDS("raw_counts.rds")
+
+tmp_genes = genes[!is.na(genes$gene_symb_wchrm),]
+idx = match(tmp_genes$gene_symb_wchrm, rownames(raw_counts))
+# rownames(raw_counts[idx,]) == tmp_genes$gene_symb_wchrm
+rownames(raw_counts)[idx] = rownames(tmp_genes)
+idx = intersect(rownames(genes), rownames(raw_counts)) 
+raw_counts = raw_counts[idx,]
+colnames(raw_counts)
+dim(raw_counts)
+
+print("# build exp_grp from multiqc")
+exp_grp_mqc = read.table("multiqc_notrim_data/multiqc_star.txt", sep="\t", header=TRUE, stringsAsFactors=FALSE)
+rownames(exp_grp_mqc) = do.call(rbind, strsplit(exp_grp_mqc$Sample, "_", fixed=TRUE))[,1]
+sum(!rownames(exp_grp_mqc) %in% colnames(raw_counts))
+exp_grp_mqc = exp_grp_mqc[colnames(raw_counts),]
+rownames(exp_grp_mqc)
+dim(exp_grp_mqc)
+
+exp_grp = exp_grp_mqc
+
+print(paste0("clinical data from epimeddb: ", gse))
+url = paste0("http://epimed.univ-grenoble-alpes.fr/database/parameters/",gse)
+df1 = read.csv2(url, header=TRUE, sep=";", stringsAsFactors=FALSE, dec=".", na.strings="", row.names=1)
+url = paste0("http://epimed.univ-grenoble-alpes.fr/database/expgroup/",gse)
+df2 = read.csv2(url, header=TRUE, sep=";", stringsAsFactors=FALSE, dec=".", na.strings="", row.names=1)  
+# rownames(df2) = df2$id_patient
+# rownames(df1) = df1$id_patient
+
+exp_grp_epimeddb = df2
+for (cn in colnames(df1)) {
+  # print(cn)
+  if (!cn %in% colnames(exp_grp_epimeddb)) {
+    # print(cn)
+    exp_grp_epimeddb[,cn] = NA
+    exp_grp_epimeddb[rownames(df1),cn] = df1[,cn]
+  }
+}
+
+## survival
+# exp_grp_epimeddb$relapsed = as.logical(exp_grp_epimeddb$relapsed)
+# exp_grp_epimeddb$dead = as.logical(exp_grp_epimeddb$dead)
+# exp_grp_epimeddb = exp_grp_epimeddb[exp_grp_epimeddb$id_patient %in% rownames(exp_grp),]
+
+
+# SRR1274635 GSM1382045  RNA-Seq analysis in HCT116 WT cells upon heat shock treatment replicate 1
+# SRR1274636 GSM1382046  RNA-Seq analysis in HCT116 WT cells upon heat shock treatment replicate 2
+# SRR1274637 GSM1382047  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 1
+# SRR1274638 GSM1382048  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 2
+
+## use exp_grp_epimeddb rownames
+exp_grp_epimeddb$srr = NA
+exp_grp_epimeddb["GSM1382045", ]$srr = "SRR1274635" 
+exp_grp_epimeddb["GSM1382046", ]$srr = "SRR1274636" 
+exp_grp_epimeddb["GSM1382047", ]$srr = "SRR1274637" 
+exp_grp_epimeddb["GSM1382048", ]$srr = "SRR1274638" 
+exp_grp_epimeddb = exp_grp_epimeddb[!is.na(exp_grp_epimeddb$srr),]
+
+rownames(exp_grp)[match(exp_grp_epimeddb$srr, rownames(exp_grp))] = rownames(exp_grp_epimeddb)
+colnames(raw_counts)[match(exp_grp_epimeddb$srr, colnames(raw_counts))] = rownames(exp_grp_epimeddb)
+for (cn in colnames(exp_grp_epimeddb)) {
+  # print(cn)
+  if (!cn %in% colnames(exp_grp)) {
+    # print(cn)
+    exp_grp[,cn] = NA
+  }
+  exp_grp[rownames(exp_grp_epimeddb),cn] = exp_grp_epimeddb[,cn]
+}
+head(exp_grp)
+dim(exp_grp)
+```
+
+
+```{r}
+# Normalize counts
+countData = raw_counts
+head(countData)
+tail(countData)
+dim(countData)
+colData = data.frame(id=colnames(countData))
+dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ id)
+dds = DESeq2::estimateSizeFactors(dds)
+
+norm_counts = DESeq2::counts(dds, normalized=TRUE)
+# log_norm_counts = SummarizedExperiment::assay(rld)
+log_norm_counts = log2(norm_counts + 1)
+layout(matrix(1:2, 1), respect=TRUE)
+plot(density(norm_counts)    , main = "norm_counts")
+plot(density(log_norm_counts), main = "log_norm_counts")
+```
+
+
+
+
+```{r}
+# export study
+s = epimedtools::create_study()
+s$data = log_norm_counts
+s$exp_grp = exp_grp
+s$platform = genes[rownames(s$data),]
+s$stuffs$name = gse
+s$stuffs$raw_counts = raw_counts
+s$stuffs$rpkm_data = t(t(s$stuffs$raw_counts) / apply(s$stuffs$raw_counts, 2, sum) * 1000000) / genes[rownames(s$stuffs$raw_counts),]$exon_length_bp * 1000
+s$stuffs$log2_rpkm_data = log2(s$stuffs$rpkm_data + 1)
+s$save(study_filename)
+```
+
+
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+

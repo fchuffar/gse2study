@@ -1,0 +1,121 @@
+---
+title: "Volcano plots"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+
+```{r results="verbatim"}
+# layout(matrix(1:10, 2, byrow=FALSE), respect=TRUE)
+table_file = "RvsP.up.txt"
+casevsctrl = read.table(paste0("tables/", table_file), header=TRUE)
+rownames(casevsctrl) = casevsctrl$Id
+
+```
+
+
+```{r}
+
+thresh = 10
+idx = (
+  casevsctrl$P_KO_rep1 < thresh  & 
+  casevsctrl$P_KO_rep2 < thresh  &
+  casevsctrl$P_KO_rep3 < thresh  &
+  casevsctrl$P_WT_rep1 < thresh  &
+  casevsctrl$P_WT_rep2 < thresh  &
+  casevsctrl$P_WT_rep3 < thresh )
+
+idx = rownames(casevsctrl)[idx]
+idx
+n = colnames(casevsctrl)[grep("norm",colnames(casevsctrl))]
+
+
+layout(matrix(1:6,2), respect=TRUE)
+data = as.matrix(log2(casevsctrl[idx,n] + 1))
+plot(density(data))
+plot(density(data[,1:6]))
+data = data - apply(data[,1:6], 1, mean)
+plot(density(data))
+plot(density(data[,1:6]))
+
+Colv = NULL
+dendrogram="none"      
+
+# # clustering base on eucl. dist. for genes
+# # hc_row = hclust(dist(data), method="complete")
+# foo = microbenchmark::microbenchmark(
+#   stats::cor(t(data), method="pe"),
+#   WGCNA::cor(t(data), method="pe"),
+#   times=10
+# )
+# plot(foo)
+#
+# cr = WGCNA::cor(t(data), method="pe")
+# euc_dist <- function(m) {mtm <- Matrix::tcrossprod(m); sq <- rowSums(m*m);  sqrt(outer(sq,sq,"+") - 2*mtm)}
+#
+# foo = microbenchmark::microbenchmark(
+#   dist(1 - cr),
+#   euc_dist(1 - cr),
+#   times=10
+# )
+# plot(foo)
+#
+#
+# bar = 1 - WGCNA::cor(t(data))
+# dst = dist(1 - WGCNA::cor(t(data), method="pe"))
+#
+#
+# foo = microbenchmark::microbenchmark(
+#   stats::hclust(dst, method="complete"),
+#   fastcluster::hclust(dst, method="complete"),
+#   times=10
+# )
+# plot(foo)
+#
+# foo = microbenchmark::microbenchmark(
+#   stats::hclust(dist(1 - stats::cor(t(data), method="pe")), method="complete"),
+#   fastcluster::hclust(dist(1 - WGCNA::cor(t(data), method="pe")), method="complete"),
+#   times=3
+# )
+# plot(foo)
+# hc_row = stats::hclust(dist(1 - stats::cor(t(data), method="pe")), method="complete")
+hc_row = fastcluster::hclust(dist(1 - WGCNA::cor(t(data[,n[c(1:6,10:12)]]), method="pe")), method="complete")
+Rowv = as.dendrogram(hc_row)
+dendrogram="row"      
+
+ct = cutree(hc_row, 2)
+table(ct)
+names(ct)[ct==2]
+
+# col
+colors=c("green", "black", "red")
+cols = colorRampPalette(colors)(20)
+# breaks = quantile(data, 0:length(cols)/length(cols))
+
+# quartz()
+foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE)
+# foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE, breaks=breaks)
+
+```
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
