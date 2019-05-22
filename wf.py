@@ -10,16 +10,16 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      fastqc_GSE57397 = get_files("/bettik/fchuffar/datashare/GSE57397/raw", ".fastq.gz", "/bettik/fchuffar/datashare/GSE57397/raw", "_fastqc.zip"),
-      bw_GSE57397 = get_files("/bettik/fchuffar/datashare/GSE57397", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE57397", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
-      yclassiccount_GSE57397 = get_files("/bettik/fchuffar/datashare/GSE57397", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE57397", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"),
-      nclassiccount_GSE57397 = get_files("/bettik/fchuffar/datashare/GSE57397", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE57397", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"),
-      rclassiccount_GSE57397 = get_files("/bettik/fchuffar/datashare/GSE57397", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE57397", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
+      fastqc_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469/raw", ".fastq.gz", "/bettik/fchuffar/datashare/GSE100469/raw", "_fastqc.zip"),
+      bw_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
+      yclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"),
+      nclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"),
+      rclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
 
     shell:"""
-multiqc --force -o ~/projects/heatshock/results/GSE57397/ -n multiqc_notrim \
-  /bettik/fchuffar/datashare/GSE57397/*_notrim_star_Homo_sapiens_hg19_Log.final.out \
-  /bettik/fchuffar/datashare/GSE57397/raw/*_*_fastqc.zip \
+multiqc --force -o /bettik/fchuffar/datashare/GSE100469/raw/ -n multiqc_notrim \
+  /bettik/fchuffar/datashare/GSE100469/*_notrim_star_Homo_sapiens_hg19_Log.final.out \
+  /bettik/fchuffar/datashare/GSE100469/raw/*_*_fastqc.zip \
 
 echo workflow \"align_heatshock\" completed at `date` 
           """

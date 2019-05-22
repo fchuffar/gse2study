@@ -14,7 +14,7 @@ output:
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 genes = readRDS("~/projects/genes/bed_grch38_epimeddb.rds")
-gse = "GSE57397"
+source("config")
 study_filename = paste0("study_", gse, ".rds")
 ```
 

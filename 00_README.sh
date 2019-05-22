@@ -1,38 +1,67 @@
+source config
+echo $gse
 ## data description
-# https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE57397
-#
-# SRR1274635 GSM1382045  RNA-Seq analysis in HCT116 WT cells upon heat shock treatment replicate 1
-# SRR1274636 GSM1382046  RNA-Seq analysis in HCT116 WT cells upon heat shock treatment replicate 2
-# SRR1274637 GSM1382047  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 1
-# SRR1274638 GSM1382048  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 2
+echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
+# GSM2684046  Mock 1 4sU-RNA - Rep 1
+# GSM2684047  Mock 2 4sU-RNA - Rep 1
+# GSM2684048  0-1 h Salt stress 4sU-RNA - Rep 1
+# GSM2684049  1-2 h Salt stress 4sU-RNA - Rep 1
+# GSM2684050  0-1 h Heat stress 4sU-RNA - Rep 1
+# GSM2684051  1-2 h Heat stress 4sU-RNA - Rep 1
+# GSM2684052  Mock 1 4sU-RNA - Rep 2
+# GSM2684053  Mock 2 4sU-RNA - Rep 2
+# GSM2684054  0-1 h Salt stress 4sU-RNA - Rep 2
+# GSM2684055  1-2 h Salt stress 4sU-RNA - Rep 2
+# GSM2684056  0-1 h Heat stress 4sU-RNA - Rep 2
+# GSM2684057  1-2 h Heat stress 4sU-RNA - Rep 2
 
 
 ## download fastq files
-mkdir -p /bettik/fchuffar/datashare/GSE57397/raw
-cd /bettik/fchuffar/datashare/GSE57397/raw
-parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id SRR1274635
-parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id SRR1274636
-parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id SRR1274637
-parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id SRR1274638
+# wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
+cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse}
+sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
+echo $sra
+cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}
+srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
+echo $srrs
+echo $srrs | wc
+
+mkdir -p /bettik/fchuffar/datashare/${gse}/raw
+cd /bettik/fchuffar/datashare/${gse}/raw
+for srr in $srrs
+do
+  echo ${srr}
+  parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id ${srr}
+done
 # SR or PE?
-ls -lha /bettik/fchuffar/datashare/GSE57397/raw
+ls -lha /bettik/fchuffar/datashare/${gse}/raw
+sequencing_read_type=PE
+
+## metadata linking sample and raw files
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+echo $gsms
+echo $gsms | wc
+
+cd /bettik/fchuffar/datashare/${gse}/
+for gsm in $gsms
+do
+  echo ${gsm}  
+  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > /bettik/fchuffar/datashare/${gse}/${gsm}_notrim_fqgz.info
+done
+# SR or PE?
+ls -lha /bettik/fchuffar/datashare/${gse}/raw
+cat *.info
 
 ## qc align count
-# rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
-cd /bettik/fchuffar/datashare/GSE57397/
-echo raw/SRR1274635_1.fastq.gz > /bettik/fchuffar/datashare/GSE57397/SRR1274635_notrim_fqgz.info
-echo raw/SRR1274636_1.fastq.gz > /bettik/fchuffar/datashare/GSE57397/SRR1274636_notrim_fqgz.info
-echo raw/SRR1274637_1.fastq.gz > /bettik/fchuffar/datashare/GSE57397/SRR1274637_notrim_fqgz.info
-echo raw/SRR1274638_1.fastq.gz > /bettik/fchuffar/datashare/GSE57397/SRR1274638_notrim_fqgz.info
-
-# put wf on luke and luachn 
+# put wf on luke and luachn
 
 rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
-snakemake -s ~/projects/heatshock/results/GSE57397/wf.py --cores 8 -pn
-
-
-## get results
-mkdir -p ~/projects/datashare/GSE57397/raw/
-rsync -auvP luke:/bettik/fchuffar/datashare/GSE57397/raw/*.html ~/projects/datashare/GSE57397/raw/
-rsync -auvP luke:/bettik/fchuffar/datashare/GSE57397/*.txt ~/projects/datashare/GSE57397/
-rsync -auvP luke:~/projects/heatshock/results/GSE57397/multiqc_notrim* ~/projects/heatshock/results/GSE57397/.
+snakemake -s ~/projects/heatshock/results/${gse}/wf.py --cores 16 -pn
+#
+#
+# ## get results
+# mkdir -p ~/projects/datashare/${gse}/raw/
+# rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
+# rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+# rsync -auvP luke:~/projects/heatshock/results/${gse}/multiqc_notrim* ~/projects/heatshock/results/${gse}/.
