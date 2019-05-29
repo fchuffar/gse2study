@@ -53,15 +53,17 @@ done
 ls -lha /bettik/fchuffar/datashare/${gse}/raw
 cat *.info
 
+
 ## qc align count
 # put wf on luke and luachn
-
 rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
 snakemake -s ~/projects/heatshock/results/${gse}/wf.py --cores 16 -pn
-#
-#
-# ## get results
-# mkdir -p ~/projects/datashare/${gse}/raw/
-# rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
-# rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
-# rsync -auvP luke:~/projects/heatshock/results/${gse}/multiqc_notrim* ~/projects/heatshock/results/${gse}/.
+snakemake -s ~/projects/heatshock/results/${gse}/wf.py --cores 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 " -pn
+
+
+## get results
+mkdir -p ~/projects/datashare/${gse}/raw/
+rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
+rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
+rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+

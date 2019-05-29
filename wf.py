@@ -11,9 +11,11 @@ rule target:
     message: "-- Rule target completed. --"
     input: 
       fastqc_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469/raw", ".fastq.gz", "/bettik/fchuffar/datashare/GSE100469/raw", "_fastqc.zip"),
-      bw_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
-      yclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"),
-      nclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"),
+      telocentro_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469/raw", "_1.fastq.gz", "/bettik/fchuffar/datashare/GSE100469/raw", "_telocentro.blasted.txt.gz"),
+      bam_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
+      # # bw_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
+      yclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt")[1],
+      nclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt")[1],
       rclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
 
     shell:"""
@@ -28,7 +30,10 @@ rule fastqc:
     output: zip="{prefix}_fastqc.zip",
             html="{prefix}_fastqc.html"
     threads: 1
-    shell:"/summer/epistorage/miniconda3/bin/fastqc {input.fastqgz}"
+    shell:"""
+    export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+    /summer/epistorage/miniconda3/bin/fastqc {input.fastqgz}
+    """
 
 
 rule trim_with_sickle_PE:
@@ -51,12 +56,31 @@ rule trim_with_sickle_PE:
   -s {output.t_fq_gz_s}
     """
 
+rule index_genome:
+    input:
+      genome_fasta="/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/WholeGenomeFasta/genome.fa", 
+      gtf="/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/geneswchrm.gtf",
+    output: directory("/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex")
+    #priority: 0
+    threads: 8
+    shell:    """
+mkdir -p {output}
+/summer/epistorage/miniconda3/bin/STAR \
+  --runThreadN `echo "$(({threads} * 2))"` \
+  --runMode genomeGenerate \
+  --genomeDir {output} \
+  --genomeFastaFiles  {input.genome_fasta} \
+  --sjdbGTFfile {input.gtf} \
+  --sjdbOverhang 100
+    """
+
 rule align_trimed:
     input:
       # fqgz_file="{prefix}/{sample}_{trim}.fastq.gz",
       # fastqc_file="{prefix}/{sample}_{trim}_fastqc.zip",
       fastqc_info="{prefix}/{sample}_{trim}_fqgz.info",
       star_index="/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex",
+      # star_index_file="/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex/SAindex",
       gtf="/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/geneswchrm.gtf",
     output:  "{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam"
     threads: 8
@@ -69,11 +93,12 @@ cd {wildcards.prefix}
   --readFilesCommand gunzip -c \
   --readFilesIn `cat {input.fastqc_info}` \
   --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_ \
+  --outReadsUnmapped Fastx \
   --outSAMtype BAM SortedByCoordinate
 /summer/epistorage/miniconda3/bin/samtools index {output}
     """
               
-rule count_classic_stranded:
+rule count_classic:
     input:
       bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
       gtf_file= "/home/fchuffar/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/{gtf_prefix}.gtf"
@@ -136,5 +161,27 @@ rule bigwig_coverage:
   --minMappingQuality 30 \
   --normalizeUsingRPKM \
   -o {output}
-
     """
+    
+    
+
+rule compile_blastdb:
+    input: "/home/fchuffar/projects/heatshock/data/{subject}.fasta"
+    output: "/home/fchuffar/projects/heatshock/data/{subject}.blast.db"
+    threads: 1
+    shell:"""
+/summer/epistorage/miniconda3/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
+touch {output}
+    """
+    
+rule blastn_ggaat:
+    input:
+      blast_db="/home/fchuffar/projects/heatshock/data/{subject}.blast.db",
+      query_fqgz="{prefix}/{sample}_2.fastq.gz",
+    output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
+    threads: 1
+    shell:"""
+gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+    """
+
