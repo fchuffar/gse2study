@@ -34,17 +34,6 @@ It includes following matrix of counts are exported as:
   * `s$stuffs$deseq_norm_counts`
   
 ```{r}
-print("# stranded or not?")
-gsm = "GSM2684048"
-foo_no = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"     ))[,2]
-foo_re = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"))[,2]
-foo_ye = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"    ))[,2]
-layout(matrix(1:2, 1), respect=TRUE)
-plot(log2(foo_re+1), log2(foo_ye+1), pch=".")
-abline(0,1, col=2)
-df = data.frame(cnt=c(log2(foo_re+1),log2(foo_ye+1)), str=c(rep("re", length(foo_re)), rep("ye", length(foo_ye))) )
-boxplot(cnt~str, df)
-
 print("# build raw counts")
 count_files = list.files(paste0("~/projects/datashare/", gse), "notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt", full.names=TRUE)  
 if (!file.exists("raw_counts.rds")) {
@@ -114,16 +103,17 @@ for (cn in colnames(df1)) {
 # SRR1274637 GSM1382047  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 1
 # SRR1274638 GSM1382048  RNA-Seq analysis in HCT116 WT cells after recovery from heat shock treatment replicate 2
 
-## use exp_grp_epimeddb rownames
-exp_grp_epimeddb$srr = NA
-exp_grp_epimeddb["GSM1382045", ]$srr = "SRR1274635" 
-exp_grp_epimeddb["GSM1382046", ]$srr = "SRR1274636" 
-exp_grp_epimeddb["GSM1382047", ]$srr = "SRR1274637" 
-exp_grp_epimeddb["GSM1382048", ]$srr = "SRR1274638" 
-exp_grp_epimeddb = exp_grp_epimeddb[!is.na(exp_grp_epimeddb$srr),]
+# ## use exp_grp_epimeddb rownames
+# exp_grp_epimeddb$srr = NA
+# exp_grp_epimeddb["GSM1382045", ]$srr = "SRR1274635"
+# exp_grp_epimeddb["GSM1382046", ]$srr = "SRR1274636"
+# exp_grp_epimeddb["GSM1382047", ]$srr = "SRR1274637"
+# exp_grp_epimeddb["GSM1382048", ]$srr = "SRR1274638"
+# exp_grp_epimeddb = exp_grp_epimeddb[!is.na(exp_grp_epimeddb$srr),]
 
-rownames(exp_grp)[match(exp_grp_epimeddb$srr, rownames(exp_grp))] = rownames(exp_grp_epimeddb)
-colnames(raw_counts)[match(exp_grp_epimeddb$srr, colnames(raw_counts))] = rownames(exp_grp_epimeddb)
+# rownames(exp_grp)[match(exp_grp_epimeddb$srr, rownames(exp_grp))] = rownames(exp_grp_epimeddb)
+# colnames(raw_counts)[match(exp_grp_epimeddb$srr, colnames(raw_counts))] = rownames(exp_grp_epimeddb)
+
 for (cn in colnames(exp_grp_epimeddb)) {
   # print(cn)
   if (!cn %in% colnames(exp_grp)) {
