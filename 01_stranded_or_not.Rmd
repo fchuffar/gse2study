@@ -1,0 +1,51 @@
+---
+title: "Is sample stranded?"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+# Data
+
+Data matrix is compute from fastq files:
+
+  * aligned on hg19 genome (UCSC) using STAR
+  * counts are computed using `htseq-count`
+  * normalization is done by DESeq2.
+  
+```{r}
+print("# stranded or not?")
+foo_no = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"     ))[,2]
+foo_re = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"))[,2]
+foo_ye = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"    ))[,2]
+layout(matrix(1:2, 1), respect=TRUE)
+plot(log2(foo_re+1), log2(foo_ye+1), pch=".")
+abline(0,1, col=2)
+df = data.frame(cnt=c(log2(foo_re+1),log2(foo_ye+1)), str=c(rep("re", length(foo_re)), rep("ye", length(foo_ye))) )
+boxplot(cnt~str, df)
+```
+
+
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+

@@ -1,3 +1,5 @@
+# rsync -auvP ~/projects/human_embrio/ luke:~/projects/human_embrio/
+# cd ~/projects/human_embrio/results/GSE72379
 source config
 echo $gse
 ## data description
@@ -18,52 +20,60 @@ echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 
 ## download fastq files
 # wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
-cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse}
 sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
 echo $sra
-cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}
 srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
 echo $srrs
 echo $srrs | wc
 
-mkdir -p /bettik/fchuffar/datashare/${gse}/raw
-cd /bettik/fchuffar/datashare/${gse}/raw
+mkdir -p ~/projects/datashare/${gse}/raw
+cd ~/projects/datashare/${gse}/raw
+
+echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
 do
-  echo ${srr}
-  parallel-fastq-dump --threads 16 --tmpdir ./ --gzip --split-files --outdir ./ --sra-id ${srr}
+  FILE=${srr}_1.fastq.gz
+  if [ -f $FILE ]; then
+     echo "File $FILE exists."
+  else
+     echo "File $FILE does not exist."
+     prefetch $srr
+     vdb-validate $srr
+     status=$?
+     ## take some decision ##
+     [ $status -ne 0 ] && echo "$srr check failed" || echo "$srr ok" >> checking_srrs_report.txt
+     parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
+  fi
 done
+
 # SR or PE?
-ls -lha /bettik/fchuffar/datashare/${gse}/raw
+ls -lha ~/projects/datashare/${gse}/raw
 sequencing_read_type=PE
 
 ## metadata linking sample and raw files
 gsms=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
 echo $gsms
 echo $gsms | wc
-
-cd /bettik/fchuffar/datashare/${gse}/
+cd ~/projects/datashare/${gse}/
 for gsm in $gsms
 do
   echo ${gsm}  
   srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
-  echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > /bettik/fchuffar/datashare/${gse}/${gsm}_notrim_fqgz.info
+  echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
 done
-# SR or PE?
-ls -lha /bettik/fchuffar/datashare/${gse}/raw
 cat *.info
 
 
 ## qc align count
 # put wf on luke and luachn
-rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
-snakemake -s ~/projects/heatshock/results/${gse}/wf.py --cores 16 -pn
-snakemake -s ~/projects/heatshock/results/${gse}/wf.py --cores 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 " -pn
+rsync -auvP ~/projects/${project}/ luke:~/projects/${project}/
+snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 16 -pn
+snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 " -pn
 
 
 ## get results
 mkdir -p ~/projects/datashare/${gse}/raw/
-rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
-rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
-rsync -auvP luke:/bettik/fchuffar/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+rsync -auvP luke:~/projects/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+rsync -auvP luke:~/projects/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
+rsync -auvP luke:~/projects/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
 
