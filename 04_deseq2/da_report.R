@@ -9,20 +9,21 @@
 ###                parameters: to be modified by the user                    ###
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
+source("../config")
 
 workDir <- "."      # working directory for the R session
 
-projectName <- "GSE57397_DESeq2"                         # name of the project
+projectName <- paste(project, gse, "DESeq2", sep="_")                         # name of the project
 author <- "Florent Chuffart"                                # author of the statistical analysis/report
 
 targetFile <- "design.txt"                           # path to the design/target file
-rawDir <- "~/projects/datashare/GSE57397/"                                      # path to the directory containing raw counts files
+rawDir <- paste0("~/projects/datashare/", gse)                                      # path to the directory containing raw counts files
 featuresToRemove <- c("alignment_not_unique",        # names of the features to be removed
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-varInt <- "treatment"                                     # factor of interest
-condRef <- "REC"                                       # reference biological condition
+varInt <- "factor"                                     # factor of interest
+condRef <- "GV"                                       # reference biological condition
 batch <- NULL                                        # blocking factor: NULL (default) or "batch" for example
 
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"

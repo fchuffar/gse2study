@@ -65,7 +65,7 @@ cat *.info
 
 
 ## qc align count
-# put wf on luke and luachn
+# put wf on luke and launch
 rsync -auvP ~/projects/${project}/ luke:~/projects/${project}/
 snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 16 -pn
 snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 " -pn
