@@ -1,0 +1,647 @@
+---
+title: "Repeated sequences"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+
+```{r}
+design = data.frame(matrix(c(
+  "SRR5756304", "GSM2684046", "mock1",
+  "SRR5756305", "GSM2684046", "mock1",
+  "SRR5756306", "GSM2684046", "mock1",
+  "SRR5756307", "GSM2684046", "mock1",
+  "SRR5756308", "GSM2684047", "mock2",
+  "SRR5756309", "GSM2684047", "mock2",
+  "SRR5756310", "GSM2684047", "mock2",
+  "SRR5756311", "GSM2684047", "mock2",
+  "SRR5756312", "GSM2684048", "01sal",
+  "SRR5756313", "GSM2684048", "01sal",
+  "SRR5756314", "GSM2684048", "01sal",
+  "SRR5756315", "GSM2684048", "01sal",
+  "SRR5756316", "GSM2684049", "12sal",
+  "SRR5756317", "GSM2684049", "12sal",
+  "SRR5756318", "GSM2684049", "12sal",
+  "SRR5756319", "GSM2684049", "12sal",
+  "SRR5756320", "GSM2684050", "01hea",
+  "SRR5756321", "GSM2684050", "01hea",
+  "SRR5756322", "GSM2684050", "01hea",
+  "SRR5756323", "GSM2684050", "01hea",
+  "SRR5756324", "GSM2684051", "12hea",
+  "SRR5756325", "GSM2684051", "12hea",
+  "SRR5756326", "GSM2684051", "12hea",
+  "SRR5756327", "GSM2684051", "12hea",
+  "SRR5756328", "GSM2684052", "mock1",
+  "SRR5756329", "GSM2684052", "mock1",
+  "SRR5756330", "GSM2684052", "mock1",
+  "SRR5756331", "GSM2684052", "mock1",
+  "SRR5756332", "GSM2684053", "mock2",
+  "SRR5756333", "GSM2684053", "mock2",
+  "SRR5756334", "GSM2684053", "mock2",
+  "SRR5756335", "GSM2684053", "mock2",
+  "SRR5756336", "GSM2684054", "01sal",
+  "SRR5756337", "GSM2684054", "01sal",
+  "SRR5756338", "GSM2684054", "01sal",
+  "SRR5756339", "GSM2684054", "01sal",
+  "SRR5756340", "GSM2684055", "12sal",
+  "SRR5756341", "GSM2684055", "12sal",
+  "SRR5756342", "GSM2684055", "12sal",
+  "SRR5756343", "GSM2684055", "12sal",
+  "SRR5756344", "GSM2684056", "01hea", 
+  "SRR5756345", "GSM2684056", "01hea", 
+  "SRR5756346", "GSM2684056", "01hea", 
+  "SRR5756347", "GSM2684056", "01hea", 
+  "SRR5756348", "GSM2684057", "12hea", 
+  "SRR5756349", "GSM2684057", "12hea", 
+  "SRR5756350", "GSM2684057", "12hea", 
+  "SRR5756351", "GSM2684057", "12hea"
+), ncol=3, byrow=TRUE), stringsAsFactors=FALSE)
+colnames(design) = c("srr", "gsm", "cond")
+design
+rownames(design) = design$srr
+
+
+
+if (!file.exists("telocentro_blasted.rds")) {
+  srrs = design$srr
+
+  if (!exists("mgzread.table")) {
+    gzread.table = function(fn, ...) read.table(gzfile(fn), ...)
+    mgzread.table = memoise::memoise(gzread.table)
+  }
+
+
+  for (srr in srrs) {
+    fn = paste0("~/projects/datashare/GSE100469/raw/", srr, "_telocentro.blasted.txt.gz")
+    print(fn)
+    foo = mgzread.table(fn, sep=",", stringsAsFactors=FALSE)
+  }
+
+
+  sseqids = names(seqinr::read.fasta("~/projects/heatshock/data/telocentro.fasta"))
+  sseqs = unlist(seqinr::getSequence(seqinr::read.fasta("~/projects/heatshock/data/telocentro.fasta"), as.string = TRUE))
+  names(sseqs) = sseqids
+  sseqs
+
+  foo = lapply(srrs, function(srr) {
+    fn = paste0("~/projects/datashare/GSE100469/raw/", srr, "_telocentro.blasted.txt.gz")
+    print(fn)
+    foo = mgzread.table(fn, sep=",", stringsAsFactors=FALSE)
+    colnames(foo) = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "sstrand")
+    # foo$sseqid_strand =   factor(foo$sseqid_strand, levels=paste(rep(sseqids, each=2), unique(foo$sstrand), sep="_"))
+    foo$sseqid = factor(foo$sseqid, levels=sseqids)
+    foo$sstrand = factor(foo$sstrand, levels=c("plus", "minus"))
+    foo$sseqid_strand = interaction(foo$sseqid, foo$sstrand)
+
+    head(foo)
+    dim(foo)
+    # print(table(foo$sseqid))
+    bar = foo[
+      (foo$sseqid %in% "seq_ggaat2"  & foo$length==10) |
+      (foo$sseqid %in% "seq_ggaat3"  & foo$length==15) |
+      (foo$sseqid %in% "seq_ggaat4"  & foo$length==20) |
+      (foo$sseqid %in% "seq_ggaat5"  & foo$length==25) |
+      (foo$sseqid %in% "seq_ttaggg2" & foo$length==12) |
+      (foo$sseqid %in% "seq_ttaggg3" & foo$length==18) |
+      (foo$sseqid %in% "seq_ttaggg4" & foo$length==24) |
+      (foo$sseqid %in% "seq_ttaggg5" & foo$length==30) |
+      FALSE
+    ,]
+    head(bar)
+    dim(bar)
+    bar = bar[!duplicated(paste(bar$sseqid, bar$qseqid, bar$qstart, sep="_")),]
+    dim(bar)
+    # bar = bar[!duplicated(paste(bar$sseqid, bar$qseqid, bar$sstrand, sep="_")),]
+    # dim(bar)
+    # table(foo[!duplicated(paste(foo$sseqid, foo$qseqid, sep="_")),]$sseqid)
+    res = table(bar$sseqid_strand)
+    # res = table(bar$sseqid,bar$sstrand)
+    # res = table(bar$sseqid)
+    print(res)
+    return(res)
+  })
+
+  foo = do.call(rbind, foo)
+  # foo = foo[,sseqids]
+  # colnames(foo) = seqs[sseqids]
+  foo = data.frame(foo)
+  rownames(foo) = srrs
+  head(foo)
+  foo$cond = design[rownames(foo),]$cond
+  head(foo)
+
+  saveRDS(foo, "telocentro_blasted.rds")
+}
+
+telocentro_blasted = readRDS("telocentro_blasted.rds")
+
+
+# stop("EFN")
+
+```
+
+
+
+
+
+
+```{r}
+head(telocentro_blasted)
+d = data.frame(cnt=unlist(lapply(telocentro_blasted[1:(ncol(telocentro_blasted)-1)], identity)), seq=rep(colnames(telocentro_blasted)[-ncol(telocentro_blasted)], each=nrow(telocentro_blasted)), cnd=telocentro_blasted[,ncol(telocentro_blasted)])
+# d = data.frame(cnt=c(telocentro_blasted[,1], telocentro_blasted[,2], telocentro_blasted[,3], telocentro_blasted[,4], telocentro_blasted[,5], telocentro_blasted[,6]), seq=rep(colnames(telocentro_blasted)[1:6], each=nrow(telocentro_blasted)), cnd=telocentro_blasted[,7])
+d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01sal", "12sal", "01hea", "12hea"))
+# d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01hea", "12hea"))
+# d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01hea", "12hea"))
+
+
+# pdf("ggaat.pdf")
+par(mar=c(7.1, 4.1, 4.1, 2.1))
+boxplot(log2(cnt+1)~cnd+seq, d, las=2, main="log2(cnt)~cnd+seq", cex.axis=.5)
+# dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# GSM2684052_telocentro.unmapblasted.txt.gz
+if (!file.exists("telocentro_unmapblasted.rds")) {
+  design = design[!duplicated(design$gsm),]
+  rownames(design) = design$gsm
+  design = design[,-1]
+
+  srrs = unique(design$gsm)
+  
+  if (!exists("mgzread.table")) {
+    gzread.table = function(fn, ...) read.table(gzfile(fn), ...)
+    mgzread.table = memoise::memoise(gzread.table)
+  }
+
+
+  for (srr in srrs) {
+    fn = paste0("~/projects/datashare/GSE100469/", srr, "_telocentro.unmapblasted.txt.gz")
+    print(fn)
+    foo = mgzread.table(fn, sep=",", stringsAsFactors=FALSE)
+  }
+  stop("EFN")
+
+  sseqids = names(seqinr::read.fasta("~/projects/heatshock/data/telocentro.fasta"))
+  sseqs = unlist(seqinr::getSequence(seqinr::read.fasta("~/projects/heatshock/data/telocentro.fasta"), as.string = TRUE))
+  names(sseqs) = sseqids
+  sseqs
+
+  foo = lapply(srrs, function(srr) {
+    fn = paste0("~/projects/datashare/GSE100469/", srr, "_telocentro.unmapblasted.txt.gz")
+    print(fn)
+    foo = mgzread.table(fn, sep=",", stringsAsFactors=FALSE)
+    colnames(foo) = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "sstrand")
+    # foo$sseqid_strand =   factor(foo$sseqid_strand, levels=paste(rep(sseqids, each=2), unique(foo$sstrand), sep="_"))
+    foo$sseqid = factor(foo$sseqid, levels=sseqids)
+    foo$sstrand = factor(foo$sstrand, levels=c("plus", "minus"))
+    foo$sseqid_strand = interaction(foo$sseqid, foo$sstrand)
+
+    head(foo)
+    dim(foo)
+    # print(table(foo$sseqid))
+    bar = foo[
+      (foo$sseqid %in% "seq_ggaat2"  & foo$length==10) |
+      (foo$sseqid %in% "seq_ggaat3"  & foo$length==15) |
+      (foo$sseqid %in% "seq_ggaat4"  & foo$length==20) |
+      (foo$sseqid %in% "seq_ggaat5"  & foo$length==25) |
+      (foo$sseqid %in% "seq_ttaggg2" & foo$length==12) |
+      (foo$sseqid %in% "seq_ttaggg3" & foo$length==18) |
+      (foo$sseqid %in% "seq_ttaggg4" & foo$length==24) |
+      (foo$sseqid %in% "seq_ttaggg5" & foo$length==30) |
+      FALSE
+    ,]
+    head(bar)
+    dim(bar)
+    bar = bar[!duplicated(paste(bar$sseqid, bar$qseqid, bar$qstart, sep="_")),]
+    dim(bar)
+    # bar = bar[!duplicated(paste(bar$sseqid, bar$qseqid, bar$sstrand, sep="_")),]
+    # dim(bar)
+    # table(foo[!duplicated(paste(foo$sseqid, foo$qseqid, sep="_")),]$sseqid)
+    res = table(bar$sseqid_strand)
+    # res = table(bar$sseqid,bar$sstrand)
+    # res = table(bar$sseqid)
+    print(res)
+    return(res)
+  })
+
+  foo = do.call(rbind, foo)
+  # foo = foo[,sseqids]
+  # colnames(foo) = seqs[sseqids]
+  foo = data.frame(foo)
+  rownames(foo) = srrs
+  head(foo)
+  foo$cond = design[rownames(foo),]$cond
+  head(foo)
+
+  saveRDS(foo, "telocentro_unmapblasted.rds")
+}
+
+telocentro_blasted = readRDS("telocentro_unmapblasted.rds")
+
+
+# stop("EFN")
+
+```
+
+
+```{r}
+head(telocentro_blasted)
+dim(telocentro_blasted)
+d = data.frame(
+  cnt = unlist(lapply(telocentro_blasted[1:(ncol(telocentro_blasted)-1)], identity)),     
+  seq = rep(colnames(telocentro_blasted)[-ncol(telocentro_blasted)], each=nrow(telocentro_blasted)), 
+  cnd = telocentro_blasted[,ncol(telocentro_blasted)]
+)
+rownames(d) = NULL
+# d = data.frame(cnt=c(telocentro_blasted[,1], telocentro_blasted[,2], telocentro_blasted[,3], telocentro_blasted[,4], telocentro_blasted[,5], telocentro_blasted[,6]), seq=rep(colnames(telocentro_blasted)[1:6], each=nrow(telocentro_blasted)), cnd=telocentro_blasted[,7])
+d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01sal", "12sal", "01hea", "12hea"))
+# d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01hea", "12hea"))
+# d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01hea", "12hea"))
+
+
+# pdf("ggaat.pdf")
+par(mar=c(7.1, 4.1, 4.1, 2.1))
+boxplot(log2(cnt+1)~cnd+seq, d, las=2, main="log2(cnt)~cnd+seq", cex.axis=.5)
+# dev.off()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r eval=FALSE}
+foo = readRDS("~/projects/heatshock/results/GSE100469/foo.rds")
+head(foo)
+d = data.frame(cnt=unlist(lapply(foo[1:(ncol(foo)-1)], identity)), seq=rep(colnames(foo)[1:(ncol(foo)-1)], each=nrow(foo)), cnd=foo[,ncol(foo)])
+# d = data.frame(cnt=c(foo[,1], foo[,2], foo[,3], foo[,4], foo[,5], foo[,6]), seq=rep(colnames(foo)[1:6], each=nrow(foo)), cnd=foo[,7])
+# d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01sal", "12sal", "01hea", "12hea"))
+d$cnd = factor(d$cnd, levels=c("mock1", "mock2", "01hea", "12hea"))
+
+
+# pdf("ggaat.pdf")
+par(mar=c(7.1, 4.1, 4.1, 2.1))
+boxplot(log2(cnt)~cnd+seq, d, las=2, main="log2(cnt)~cnd+seq", cex.axis=.5)
+# dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+for (srr in srrs) {
+  print(srr)
+  foo = mgzread.table(paste0("/bettik/fchuffar/datashare/GSE100469/raw/", srr, "_telocentro.blasted.txt"), sep=",", stringsAsFactors=FALSE)
+}
+
+
+
+
+
+srr = "SRR5756351"
+print(srr)
+foo = mgzread.table(paste0("/bettik/fchuffar/datashare/GSE100469/raw/", srr, "_telocentro.blasted.txt"), sep=",", stringsAsFactors=FALSE)
+colnames(foo) = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore", "sstrand")
+sseqids = c(">cvourch_seq08", ">cvourch_seq34", ">cvourch_seq35", ">cvourch_seq36", ">cvourch_seq37", ">cvourch_seq38", ">cvourch_seq39", ">cvourch_seq40", ">cvourch_seq41")
+
+
+foo = foo[foo$sseqid %in% sseqids,]
+dim(foo)
+table(foo$sseqid)
+
+
+unique(foo$pident  )
+sort(unique(foo$length  ))
+unique(foo$mismatch)
+unique(foo$gapopen )
+
+foo = foo[foo$sseqid %in% sseqids & foo$length>=10,]
+dim(foo)
+
+
+table(foo[!duplicated(paste(foo$sseqid, foo$qseqid, sep="_")),]$sseqid)
+
+head(foo$qseqid)
+
+
+
+> 18800 / 114596834
+[1] 0.0001640534
+
+0.0001
+0.0001
+
+
+
+22471466
+
+
+head -n 10000 /bettik/fchuffar/datashare/GSE100469/raw/SRR5756323_1.fa > /tmp/foo.fa
+
+blastn -db ~/projects/heatshock/data/ggaat_seqs10.blast.db -num_threads=16 -query /tmp/foo.fa -outfmt 10 -evalue 10 -task blastn-short -word_size 5 -perc_identity 100 -qcov_hsp_perc 5  | cut -d, -f4 | grep 10
+
+blastn -db ~/projects/heatshock/data/ggaat_seqs10.blast.db -num_threads=16 -query /tmp/foo.fa -outfmt 10 -evalue 10 -task blastn-short -word_size 5 -perc_identity 100 -qcov_hsp_perc 5   
+blastn -db ~/projects/heatshock/data/ggaat_seqs10.blast.db -num_threads=16 -query /tmp/foo.fa -outfmt "10 std sframe sseq sstrand" -evalue 10 -task blastn-short -word_size 5 -perc_identity 100 -qcov_hsp_perc 5 
+
+
+https://www.ncbi.nlm.nih.gov/books/NBK279684/
+http://seqanswers.com/forums/archive/index.php/t-32352.html 
+http://www.metagenomics.wiki/tools/blast/blastn-output-format-6
+
+
+
+/bettik/fchuffar/datashare/GSE100469/raw/SRR5756323
+
+dim(foo)
+
+colnames(foo)
+table(foo$length)
+table(foo$pident)
+
+table(foo$sseqid)
+
+
+
+head(foo)
+dim(foo)
+# print(table(foo$sseqid))
+bar = foo[foo$sseqid %in% sseqids & foo$length>=10,]
+dim(bar)
+bar = bar[!(bar$sseqid %in% ">cvourch_seq23" & bar$length==10),]
+dim(bar)
+print(table(bar$sseqid))
+table(bar$sseqid)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+table(foo$sseqid)
+sum(foo$sseqid=="cvourch_seq9")
+
+min(foo$length)
+
+
+
+sum(foo$sseqid==">cvourch_seq8")
+sum(foo$sseqid==">cvourch_seq19")
+sum(foo$sseqid==">cvourch_seq20")
+sum(foo$sseqid==">cvourch_seq21")
+sum(foo$sseqid==">cvourch_seq22")
+
+sseqids = c(">cvourch_seq8", ">cvourch_seq19", ">cvourch_seq20", ">cvourch_seq21", ">cvourch_seq22")
+
+bar = foo[foo$sseqid %in% sseqids & foo$length==10,]
+dim(bar)
+print(table(bar$sseqid))
+
+>>cvourch_seq8
+GGAATGGAAT
+>>cvourch_seq19
+CAACCCGAGT
+>>cvourch_seq20
+CAACTCGATT
+>>cvourch_seq21
+CGAATGTAAT
+>>cvourch_seq22
+GGAACCGAAT
+
+
+>cvourch_seq19 >cvourch_seq20 >cvourch_seq21 >cvourch_seq22 >cvourch_seq23 
+        153568         120787         363850         167876        1432272 
+>cvourch_seq24  >cvourch_seq5  >cvourch_seq6  >cvourch_seq7  >cvourch_seq8 
+        150045         631637        2898764        2149816         658310 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+foo = do.call(rbind,foo)
+
+dim(foo)
+foo = foo[foo$sseqid!=">cvourch_seq33",]
+dim(foo)
+head(foo)
+layout(matrix(1:6, 2, byrow=TRUE), respect=TRUE)
+
+plot(density(foo$pident))
+plot(density(foo$length))
+plot(density(-log10(foo$evalue)))
+plot(density(foo$bitscore))
+
+plot(foo$length,foo$pident)
+plot(foo$length, -log10(foo$evalue))
+plot(foo$pident, -log10(foo$evalue))
+plot(foo$pident, foo$bitscore)
+
+plot(-log10(foo$evalue), foo$bitscore)
+
+
+
+
+
+
+1 SRR1274635.548026 >cvourch_seq33 86.047     43        6       0      8   50
+2 SRR1274635.548026 >cvourch_seq33 86.047     43        6       0      8   50
+3 SRR1274635.548026 >cvourch_seq33 85.000     40        6       0     11   50
+
+
+
+
+
+
+
+
+table(foo$sseqid)       
+foo = foo[substr(foo$sseqid, 1, 8) == ">cvourch",]
+
+srrs = c(
+  "SRR3146452",
+  "SRR3146508",
+  "SRR6726012",
+  "SRR6726015",
+  "SRR6726016",
+  "SRR6726018",
+  "SRR6726019",
+  "SRR6726020",
+  "SRR6726021",
+  "SRR6726042",
+  "SRR6726043",
+  "SRR6726044",
+  "SRR6726046",
+  "SRR6726087",
+  "SRR6726088",
+  "SRR6726089",
+  "SRR6726090",
+  "SRR6726153",
+  "SRR6726154",
+  "SRR6726155"
+)
+
+cols = c(
+  SRR3146452 = "dark",
+  SRR6726012 = "dark",
+  SRR6726013 = "dark",
+  SRR6726014 = "dark",
+  SRR6726015 = "dark",
+  SRR6726016 = "dark",
+  SRR3146494 = "pale",
+  SRR6726159 = "pale",
+  SRR6726160 = "pale",
+  SRR6726161 = "pale",
+  SRR6726162 = "pale",
+  SRR3146497 = "early",
+  SRR6726153 = "early",
+  SRR6726154 = "early",
+  SRR6726155 = "early",
+  SRR6726156 = "early",
+  SRR6726157 = "early",
+  SRR3146504 = "lept",
+  SRR6726087 = "lept",
+  SRR6726088 = "lept",
+  SRR6726089 = "lept",
+  SRR6726090 = "lept",
+  SRR3146507 = "late",
+  SRR6726042 = "late",
+  SRR6726043 = "late",
+  SRR6726044 = "late",
+  SRR6726045 = "late",
+  SRR6726046 = "late",
+  SRR3146508 = "round",
+  SRR6726017 = "round",
+  SRR6726018 = "round",
+  SRR6726019 = "round",
+  SRR6726020 = "round",
+  SRR6726021 = "round"
+)
+
+cols = factor(cols, levels=c("dark", "pale", "lept", "early", "late", "round"))
+
+
+exp_grp = suppressWarnings(read.table("~/projects/human_spermato/results/multiqc_notrim_data/multiqc_star.txt", sep="\t", header=TRUE, stringsAsFactors=FALSE))
+rownames(exp_grp) = substr(exp_grp$Sample, 6, 15)
+head(exp_grp)
+exp_grp$total_reads
+
+
+bar = lapply(srrs, function(srr) {
+  print(srr)  
+  foo = mgzread.table(paste0("~/projects/datashare/SRP069329/raw/", srr, "_blasted.txt"), sep=",", stringsAsFactors=FALSE)
+  colnames(foo) = c("qseqid", "sseqid", "pident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
+  foo = foo[substr(foo$sseqid, 1, 8) == ">cvourch",]
+  foo$sseqid = substr(foo$sseqid, 10, 1000)
+  
+  foo$sseqid = factor(foo$sseqid, levels=c("seq26", "seq27", "seq28", "seq32", "seq39"))
+  table(foo$sseqid) / exp_grp[srr,]$total_reads * 1000000
+})
+names(bar) = srrs
+
+bar = data.frame(do.call(rbind, bar))
+
+bar$stage = cols[rownames(bar)] 
+
+layout(matrix(1:6, 2), respect=TRUE)
+boxplot(seq26~stage, bar, main="seq26")
+boxplot(seq27~stage, bar, main="seq27")
+boxplot(seq28~stage, bar, main="seq28")
+boxplot(seq32~stage, bar, main="seq32")
+boxplot(seq39~stage, bar, main="seq39")
+```
+
+
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
