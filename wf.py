@@ -1,3 +1,5 @@
+exec(open("config").read())
+
 def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
   files = [f for f in os.listdir(src_dir) if re.match("^.*"+src_suffix+"$", f)]
   files = [x.replace(src_suffix, dest_suffix) for x in files ]
@@ -10,20 +12,21 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      fastqc_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379/raw", ".fastq.gz", "/bettik/fchuffar/datashare/GSE72379/raw", "_fastqc.zip"),
-      # telocentro_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379/raw", "_1.fastq.gz", "/bettik/fchuffar/datashare/GSE72379/raw", "_telocentro.blasted.txt.gz"),
-      bam_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE72379", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
-      # bw_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE72379", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
-      yclassiccount_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE72379", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt")[1],
-      nclassiccount_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE72379", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt")[1],
-      rclassiccount_GSE72379 = get_files("/bettik/fchuffar/datashare/GSE72379", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE72379", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
+      fastqc_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469/raw", ".fastq.gz", "/bettik/fchuffar/datashare/GSE100469/raw", "_fastqc.zip"),
+      telocentro_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469/raw", "_1.fastq.gz", "/bettik/fchuffar/datashare/GSE100469/raw", "_telocentro.blasted.txt.gz"),
+      unmaptelocentro_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_telocentro.unmapblasted.txt.gz"),
+      bam_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
+      # bw_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
+      yclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt")[1],
+      nclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt")[1],
+      rclassiccount_GSE100469 = get_files("/bettik/fchuffar/datashare/GSE100469", "_notrim_fqgz.info", "/bettik/fchuffar/datashare/GSE100469", "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
 
     shell:"""
-multiqc --force -o /bettik/fchuffar/datashare/GSE72379/raw/ -n multiqc_notrim \
-  /bettik/fchuffar/datashare/GSE72379/*_notrim_star_Homo_sapiens_hg19_Log.final.out \
-  /bettik/fchuffar/datashare/GSE72379/raw/*_*_fastqc.zip \
+multiqc --force -o /bettik/fchuffar/datashare/GSE100469/raw/ -n multiqc_notrim \
+  /bettik/fchuffar/datashare/GSE100469/*_notrim_star_Homo_sapiens_hg19_Log.final.out \
+  /bettik/fchuffar/datashare/GSE100469/raw/*_*_fastqc.zip \
 
-echo workflow \"align_human_embrio\" completed at `date` 
+echo workflow \"align_heatshock\" completed at `date` 
           """
 rule fastqc:
     input:  fastqgz="{prefix}.fastq.gz"
@@ -166,8 +169,8 @@ rule bigwig_coverage:
     
 
 rule compile_blastdb:
-    input: "/home/fchuffar/projects/human_embrio/data/{subject}.fasta"
-    output: "/home/fchuffar/projects/human_embrio/data/{subject}.blast.db"
+    input: "/home/fchuffar/projects/heatshock/data/{subject}.fasta"
+    output: "/home/fchuffar/projects/heatshock/data/{subject}.blast.db"
     threads: 1
     shell:"""
 /summer/epistorage/miniconda3/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
@@ -176,12 +179,24 @@ touch {output}
     
 rule blastn_ggaat:
     input:
-      blast_db="/home/fchuffar/projects/human_embrio/data/{subject}.blast.db",
-      query_fqgz="{prefix}/{sample}_2.fastq.gz",
+      blast_db="/home/fchuffar/projects/heatshock/data/{subject}.blast.db",
+      query_fqgz="{prefix}/{sample}_1.fastq.gz",
     output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
     threads: 1
     shell:"""
 gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
+/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+    """
+
+
+rule blastn_unmapped_ggaat:
+    input:
+      blast_db="/home/fchuffar/projects/heatshock/data/{subject}.blast.db",
+      query_fqgz="{prefix}/{sample}_notrim_star_Homo_sapiens_hg19_Unmapped.out.mate1",
+    output: "{prefix}/{sample}_{subject}.unmapblasted.txt.gz"
+    threads: 1
+    shell:"""
+cat {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
 /summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
