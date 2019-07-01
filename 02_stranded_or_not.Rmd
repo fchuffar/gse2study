@@ -1,6 +1,6 @@
 ---
 title: "Is sample stranded?"
-author: "Florent Chuffart"
+author: "Florent Chuffart, Céline Mandier"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_document:
@@ -20,9 +20,25 @@ source("config")
 
 Data matrix is compute from fastq files:
 
-  * aligned on hg19 genome (UCSC) using STAR
-  * counts are computed using `htseq-count`
-  * normalization is done by DESeq2.
+  * from study `r gse`
+  * aligned on `r species` genome (UCSC) using STAR
+
+Raw counts:
+
+  * are computed using htseq-count
+  * are normalized using DESeq2
+
+We generate three tables corresponding to the count of reads for genes with htseq strand option set to:
+
+  * `yes`
+  * `no`
+  * `reverse`
+
+We plot raw counts obtained using `yes` option according to raw counts obtained using `reverse` option.
+
+We plot characterization of reads `reverse` and reads `yes` with boxplot.
+
+
   
 ```{r}
 print("# stranded or not?")

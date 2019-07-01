@@ -1,7 +1,8 @@
-# rsync -auvP ~/projects/human_embrio/ luke:~/projects/human_embrio/
-# cd ~/projects/human_embrio/results/GSE72379
+# rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
+# cd ~/projects/heatshock/results/GSE100469
 source config
 echo $gse
+echo $project
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 # GSM2684046  Mock 1 4sU-RNA - Rep 1

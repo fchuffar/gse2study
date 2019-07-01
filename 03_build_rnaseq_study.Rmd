@@ -29,6 +29,7 @@ Data matrix is compute from fastq files:
 Full epimedtools study `s` is exported as `r study_filename`.
 
 It includes following matrix of counts are exported as:
+
   * `s$stuffs$raw_counts`
   * `s$stuffs$rpkm_norm_counts`
   * `s$stuffs$deseq_norm_counts`
