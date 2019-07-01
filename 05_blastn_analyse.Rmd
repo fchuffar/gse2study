@@ -261,6 +261,7 @@ if (!file.exists("telocentro_unmapblasted.rds")) {
 }
 
 telocentro_blasted = readRDS("telocentro_unmapblasted.rds")
+saveRDS(t(telocentro_blasted[,-ncol(telocentro_blasted)]), "raw_counts_telocentro.rds")
 
 
 # stop("EFN")
