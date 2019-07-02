@@ -16,17 +16,17 @@ knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, 
 source("config")
 ```
 
+
 # Data
 
 Data matrix is compute from fastq files:
 
   * from study `r gse`
-  * aligned on `r species` genome (UCSC) using STAR
+  * aligned on `r species    ` `r version    ` `r annotation ` genome using STAR
+  * counts are computed using `htseq-count`
+  * normalization is done by DESeq2.
 
-Raw counts:
-
-  * are computed using htseq-count
-  * are normalized using DESeq2
+Raw counts are computed using htseq-count
 
 We generate three tables corresponding to the count of reads for genes with htseq strand option set to:
 
@@ -34,11 +34,12 @@ We generate three tables corresponding to the count of reads for genes with htse
   * `no`
   * `reverse`
 
-We plot raw counts obtained using `yes` option according to raw counts obtained using `reverse` option.
+We plot raw counts obtained using `htseq-count stranded` option `yes` according to raw counts obtained using `htseq-count stranded` option `reverse`.
 
 We plot characterization of reads `reverse` and reads `yes` with boxplot.
 
 
+# Results
   
 ```{r}
 print("# stranded or not?")

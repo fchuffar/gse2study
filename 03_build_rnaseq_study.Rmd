@@ -22,17 +22,17 @@ study_filename = paste0("study_", gse, ".rds")
 
 Data matrix is compute from fastq files:
 
-  * aligned on hg19 genome (UCSC) using STAR
+  * from study `r gse`
+  * aligned on `r species    ` `r version    ` `r annotation ` genome using STAR
   * counts are computed using `htseq-count`
   * normalization is done by DESeq2.
   
-Full epimedtools study `s` is exported as `r study_filename`.
+Full epimedtools study `s` is exported as `r study_filename`, see https://github.com/fchuffar/epimedtools for details.
 
-It includes following matrix of counts are exported as:
+It also includes following matrix of counts are exported as:
 
-  * `s$stuffs$raw_counts`
-  * `s$stuffs$rpkm_norm_counts`
-  * `s$stuffs$deseq_norm_counts`
+  * raw counts (`s$stuffs$raw_counts`)
+  * RPKM normalised counts (`s$stuffs$rpkm_norm_counts`)
   
 ```{r}
 print("# build raw counts")
@@ -162,6 +162,16 @@ s$stuffs$log2_rpkm_data = log2(s$stuffs$rpkm_data + 1)
 s$save(study_filename)
 ```
 
+```{r echo=TRUE, results="verbatim"}
+head(s$exp_grp)
+dim(s$exp_grp)
+
+head(s$data)
+dim(s$data)
+
+head(s$platform)
+dim(s$platform)
+```
 
 
 
