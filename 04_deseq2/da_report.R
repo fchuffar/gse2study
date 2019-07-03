@@ -10,6 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 source("../config")
+source("../config.R")
 
 workDir <- "."      # working directory for the R session
 
@@ -17,13 +18,22 @@ projectName <- paste(project, gse, "DESeq2", sep="_")                         # 
 author <- "Florent Chuffart"                                # author of the statistical analysis/report
 
 targetFile <- "design.txt"                           # path to the design/target file
+
+write.table(data.frame(
+  label = design$gsm,
+  files = paste0(design$gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
+  cond = design$cond, 
+  stringsAsFactors=FALSE
+), targetFile,sep=" ", quote=FALSE, row.names=FALSE)
+
+
 rawDir <- paste0("~/projects/datashare/", gse)                                      # path to the directory containing raw counts files
 featuresToRemove <- c("alignment_not_unique",        # names of the features to be removed
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
-varInt <- "factor"                                     # factor of interest
-condRef <- "GV"                                       # reference biological condition
+varInt <- "cond"                                     # factor of interest
+condRef <- as.character(design[1,varInt])                                       # reference biological condition
 batch <- NULL                                        # blocking factor: NULL (default) or "batch" for example
 
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"

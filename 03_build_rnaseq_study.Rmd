@@ -29,14 +29,14 @@ Data matrix is compute from fastq files:
   
 Full epimedtools study `s` is exported as `r study_filename`, see https://github.com/fchuffar/epimedtools for details.
 
-It also includes following matrix of counts are exported as:
+It also includes following matrix of counts:
 
   * raw counts (`s$stuffs$raw_counts`)
   * RPKM normalised counts (`s$stuffs$rpkm_norm_counts`)
   
 ```{r}
 print("# build raw counts")
-count_files = list.files(paste0("~/projects/datashare/", gse), "notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt", full.names=TRUE)  
+count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", version, "_geneswchrm_strandedreverse_classiccounts.txt"), full.names=TRUE)  
 if (!file.exists("raw_counts.rds")) {
   raw_counts = sapply(unlist(count_files), function(cnt_filename){
     foo = read.table(cnt_filename)
