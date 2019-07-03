@@ -36,7 +36,7 @@ It also includes following matrix of counts:
   
 ```{r}
 print("# build raw counts")
-count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", version, "_geneswchrm_strandedreverse_classiccounts.txt"), full.names=TRUE)  
+count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", version, "_geneswchrm_stranded", strand, "_classiccounts.txt"), full.names=TRUE)  
 if (!file.exists("raw_counts.rds")) {
   raw_counts = sapply(unlist(count_files), function(cnt_filename){
     foo = read.table(cnt_filename)
