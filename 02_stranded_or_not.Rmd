@@ -53,6 +53,24 @@ df = data.frame(cnt=c(log2(foo_re+1),log2(foo_ye+1)), str=c(rep("re", length(foo
 boxplot(cnt~str, df)
 ```
 
+```{r}
+diff = median(log2(foo_re+1)) - median(log2(foo_ye+1))
+
+if (diff > 2) {
+  strand = "reverse" 
+} else if (diff < -2) {
+  strand = "yes" 
+} else {
+  strand = "no"  
+}
+
+```
+
+# conclusion
+
+```{r echo=TRUE, results="verbatim"}
+strand
+```
 
 
 
