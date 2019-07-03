@@ -16,6 +16,7 @@ knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, 
 source("config")
 source("config.R")
 ```
+# Counts
 
 ```{r}
 # GSM2684052_telocentro.unmapblasted.txt.gz
@@ -109,6 +110,63 @@ par(mar=c(7.1, 4.1, 4.1, 2.1))
 boxplot(log2(cnt+1)~cnd+seq, d, las=2, main="log2(cnt)~cnd+seq", cex.axis=.5)
 # dev.off()
 ```
+
+# Enhance study
+
+
+```{r, label="normalization"}
+study_filename = paste0("study_", gse, ".rds")
+study_filename_enhanced = paste0("study_", gse, "_enhanced.rds")
+s = epimedtools::create_study(study_filename)
+exp_grp = s$exp_grp
+
+platform = s$platform
+raw_counts = s$stuffs$raw_counts
+
+# raw_counts_enhanced
+raw_counts_telocentro = readRDS("raw_counts_telocentro.rds")
+if (!all(colnames(raw_counts) %in% colnames(raw_counts_telocentro))) {
+  stop("All raw_counts colnames are not in colnames of raw_counts_telocentro")
+}
+raw_counts_enhanced = rbind(raw_counts, raw_counts_telocentro[,colnames(raw_counts)])
+platform_telocentro = matrix(NA, nrow=nrow(raw_counts_telocentro), ncol=ncol(platform))
+rownames(platform_telocentro) = rownames(raw_counts_telocentro)
+colnames(platform_telocentro) = colnames(platform)
+platform_enhanced = rbind(platform, platform_telocentro)
+exp_grp_enhanced = exp_grp
+exp_grp_enhanced$cond = design[rownames(exp_grp_enhanced),]$cond
+
+# Normalize counts
+countData = raw_counts_enhanced
+head(countData)
+tail(countData)
+dim(countData)
+colData = data.frame(id=colnames(countData))
+dds = DESeq2::DESeqDataSetFromMatrix(countData=countData, colData=colData, design= ~ id)
+dds = DESeq2::estimateSizeFactors(dds)
+
+norm_counts = DESeq2::counts(dds, normalized=TRUE)
+# log_norm_counts = SummarizedExperiment::assay(rld)
+log_norm_counts = log2(norm_counts + 1)
+layout(matrix(1:2, 1), respect=TRUE)
+plot(density(norm_counts)    , main = "norm_counts")
+plot(density(log_norm_counts), main = "log_norm_counts")
+
+s = epimedtools::create_study()
+s$data = log_norm_counts
+s$exp_grp = exp_grp_enhanced
+s$platform = platform_enhanced
+s$stuffs$name = gse
+# s$stuffs$raw_counts = raw_counts
+# s$stuffs$rpkm_data = t(t(s$stuffs$raw_counts) / apply(s$stuffs$raw_counts, 2, sum) * 1000000) / genes[rownames(s$stuffs$raw_counts),]$exon_length_bp * 1000
+# s$stuffs$log2_rpkm_data = log2(s$stuffs$rpkm_data + 1)
+s$save(study_filename_enhanced)
+
+for (g in c("seq_ggaat2.minus", "seq_ggaat3.minus", "seq_ggaat4.minus", "seq_ggaat5.minus")) {
+  boxplot(s$data[g,]~s$exp_grp[colnames(s$data),]$cond, las=2, main=g)  
+}
+```
+
 
 
 # Session Information
