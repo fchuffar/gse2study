@@ -53,16 +53,40 @@ if (!file.exists("telocentro_unmapblasted.rds")) {
     head(foo)
     dim(foo)
     # print(table(foo$sseqid))
+    baz = sapply(names(sseqs), function(sseq) {
+      foo$sseqid %in% sseq & foo$length==nchar(sseqs[[sseq]])
+    })
+    baz2 = apply(baz, 1, any)
+    sum(baz2)
+    
+    # nsseqs2 = c(
+    #   "seq_ggaat2" ,
+    #   "seq_ggaat3" ,
+    #   "seq_ggaat4" ,
+    #   "seq_ggaat5" ,
+    #   "seq_ttaggg2",
+    #   "seq_ttaggg3",
+    #   "seq_ttaggg4",
+    #   "seq_ttaggg5"
+    # )
+    # baz = sapply(nsseqs2, function(sseq) {
+    #   foo$sseqid %in% sseq & foo$length==nchar(sseqs[[sseq]])
+    # })
+    # baz2 = apply(baz, 1, any)
+    # sum(baz2)
+
+    
     bar = foo[
-      (foo$sseqid %in% "seq_ggaat2"  & foo$length==10) |
-      (foo$sseqid %in% "seq_ggaat3"  & foo$length==15) |
-      (foo$sseqid %in% "seq_ggaat4"  & foo$length==20) |
-      (foo$sseqid %in% "seq_ggaat5"  & foo$length==25) |
-      (foo$sseqid %in% "seq_ttaggg2" & foo$length==12) |
-      (foo$sseqid %in% "seq_ttaggg3" & foo$length==18) |
-      (foo$sseqid %in% "seq_ttaggg4" & foo$length==24) |
-      (foo$sseqid %in% "seq_ttaggg5" & foo$length==30) |
-      FALSE
+    baz2,
+      # (foo$sseqid %in% "seq_ggaat2"  & foo$length==10) |
+      # (foo$sseqid %in% "seq_ggaat3"  & foo$length==15) |
+      # (foo$sseqid %in% "seq_ggaat4"  & foo$length==20) |
+      # (foo$sseqid %in% "seq_ggaat5"  & foo$length==25) |
+      # (foo$sseqid %in% "seq_ttaggg2" & foo$length==12) |
+      # (foo$sseqid %in% "seq_ttaggg3" & foo$length==18) |
+      # (foo$sseqid %in% "seq_ttaggg4" & foo$length==24) |
+      # (foo$sseqid %in% "seq_ttaggg5" & foo$length==30) |
+      # FALSE
     ,]
     head(bar)
     dim(bar)
