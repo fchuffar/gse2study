@@ -14,6 +14,7 @@ rule target:
     message: "-- Rule target completed. --"
     input: 
       fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
+      fqc_files    = get_files("~/projects/datashare/"+gse+"/raw", ".fq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
       blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_telocentro.unmapblasted.txt.gz"),
       bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
       # bw_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
