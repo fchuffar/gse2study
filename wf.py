@@ -84,7 +84,9 @@ rule align_trimed:
       fastqc_info="{prefix}/{sample}_{trim}_fqgz.info",
       star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex"),
       gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/geneswchrm.gtf"),
-    output:  "{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam"
+    output:
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
+      unmapped_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Unmapped.out.mate1.gz"
     threads: 8
     shell:"""
 cd {wildcards.prefix}
@@ -97,7 +99,8 @@ cd {wildcards.prefix}
   --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_ \
   --outReadsUnmapped Fastx \
   --outSAMtype BAM SortedByCoordinate
-/summer/epistorage/miniconda3/bin/samtools index {output}
+gzip {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_Unmapped.out.mate*
+/summer/epistorage/miniconda3/bin/samtools index {output.bam_file}
     """
               
 rule count_classic:
@@ -191,7 +194,7 @@ gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A |
 rule blastn_unmapped_ggaat:
     input:
       blast_db=os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db"),
-      query_fqgz="{prefix}/{sample}_notrim_star_Homo_sapiens_hg19_Unmapped.out.mate1",
+      query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{index}_Unmapped.out.mate1.gz",
     output: "{prefix}/{sample}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
