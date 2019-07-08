@@ -14,7 +14,7 @@ rule target:
     message: "-- Rule target completed. --"
     input: 
       fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
-      blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_telocentro.unmapblasted.txt.gz"),
+      blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_telocentro.unmapblasted.txt.gz"),
       bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
       # bw_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
       ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt")[1],
@@ -195,7 +195,7 @@ rule blastn_unmapped_ggaat:
     input:
       blast_db=os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db"),
       query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{index}_Unmapped.out.mate1.gz",
-    output: "{prefix}/{sample}_{subject}.unmapblasted.txt.gz"
+    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
 cat {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
