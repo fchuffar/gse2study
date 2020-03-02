@@ -43,9 +43,9 @@ We plot characterization of reads `reverse` and reads `yes` with boxplot.
   
 ```{r}
 print("# stranded or not?")
-foo_no = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt"     ))[,2]
-foo_re = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"))[,2]
-foo_ye = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt"    ))[,2]
+foo_no = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_geneswchrm_strandedno_classiccounts.txt"     ))[,2]
+foo_re = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_geneswchrm_strandedreverse_classiccounts.txt"))[,2]
+foo_ye = read.table(paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_geneswchrm_strandedyes_classiccounts.txt"    ))[,2]
 layout(matrix(1:2, 1), respect=TRUE)
 plot(log2(foo_re+1), log2(foo_ye+1), pch=".")
 abline(0,1, col=2)
