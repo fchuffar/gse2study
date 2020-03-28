@@ -3,6 +3,8 @@
 source config
 echo $gse
 echo $project
+echo "rsync -auvP ~/projects/${project}/ luke:~/projects/${project}/"
+echo "cd ~/projects/${project}/results/${gse}"
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 # GSM2684046  Mock 1 4sU-RNA - Rep 1
