@@ -13,19 +13,20 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
-      fqc_files    = get_files("~/projects/datashare/"+gse+"/raw", ".fq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
-      blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_telocentro.unmapblasted.txt.gz"),
-      bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bam"),
-      # bw_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_Aligned.sortedByCoord.out.bw"),
-      ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedyes_classiccounts.txt")[1],
-      ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedno_classiccounts.txt")[1],
-      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt")[1],
+      fastqc_files = get_files("~/projects/"+datashare+"/"+gse+"/raw", ".fastq.gz", "~/projects/"+datashare+"/"+gse+"/raw", "_fastqc.zip"),
+      # star_index = directory(os.path.expanduser("~/projects/datashare/genomes/"+species+"/UCSC/"+version+"/Sequence/StarIndex")),
+      # fqc_files    = get_files("~/projects/"+datashare+"/"+gse+"/raw", ".fq.gz", "~/projects/"+datashare+"/"+gse+"/raw", "_fastqc.zip"),
+      # blastn_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_telocentro.unmapblasted.txt.gz"),
+      bam_files    = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bam"),
+      # bw_files     = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bw"),
+      ycount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1],
+      ncount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt")[1],
+      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
 
     shell:"""
-multiqc --force -o ~/projects/datashare/"""+gse+"""/raw/ -n multiqc_notrim \
-  ~/projects/datashare/"""+gse+"""/*_notrim_star_Homo_sapiens_hg19_Log.final.out \
-  ~/projects/datashare/"""+gse+"""/raw/*_*_fastqc.zip \
+multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_notrim_star_"""+species+"""_"""+version+"""_Log.final.out \
+  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip \
 
 echo workflow \"align_heatshock\" completed at `date` 
           """
@@ -35,8 +36,8 @@ rule fastqc:
             html="{prefix}_fastqc.html"
     threads: 1
     shell:"""
-    export PATH="/summer/epistorage/miniconda3/bin:$PATH"
-    /summer/epistorage/miniconda3/bin/fastqc {input.fastqgz}
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+fastqc {input.fastqgz}
     """
 
 
@@ -51,7 +52,8 @@ rule trim_with_sickle_PE:
     threads: 1
     message:  "--- triming with sickle (Paired-End) ---"
     shell:"""
-/summer/epistorage/miniconda3/bin/sickle  pe -g\
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+sickle  pe -g\
   -t sanger \
   -f {input.fq_gz_f} \
   -r {input.fq_gz_r} \
@@ -62,15 +64,16 @@ rule trim_with_sickle_PE:
 
 rule index_genome:
     input:
-      genome_fasta=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/WholeGenomeFasta/genome.fa"), 
-      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/geneswchrm.gtf"),
-    output: directory(os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex"))
+      genome_fasta=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Sequence/WholeGenomeFasta/genome.fa"), 
+      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/"+gtf_prefix+".gtf"),
+    output: directory(os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Sequence/StarIndex"))
     #priority: 0
-    threads: 8
+    threads: 32
     shell:    """
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"    
 mkdir -p {output}
-/summer/epistorage/miniconda3/bin/STAR \
-  --runThreadN `echo "$(({threads} * 2))"` \
+STAR \
+  --runThreadN {threads} \
   --runMode genomeGenerate \
   --genomeDir {output} \
   --genomeFastaFiles  {input.genome_fasta} \
@@ -83,36 +86,40 @@ rule align_trimed:
       # fqgz_file="{prefix}/{sample}_{trim}.fastq.gz",
       # fastqc_file="{prefix}/{sample}_{trim}_fastqc.zip",
       fastqc_info="{prefix}/{sample}_{trim}_fqgz.info",
-      star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Sequence/StarIndex"),
-      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/geneswchrm.gtf"),
+      star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Sequence/StarIndex"),
+      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/"+gtf_prefix+".gtf"),
     output:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
-      unmapped_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Unmapped.out.mate1.gz"
-    threads: 8
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
+      unmapped_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Unmapped.out.mate1.gz"
+    threads: 32
     shell:"""
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
 cd {wildcards.prefix}
-/summer/epistorage/miniconda3/bin/STAR \
-  --runThreadN `echo "$(({threads} * 2))"` \
+STAR \
+  --runThreadN {threads} \
   --genomeDir  {input.star_index} \
   --sjdbGTFfile {input.gtf} \
   --readFilesCommand gunzip -c \
   --readFilesIn `cat {input.fastqc_info}` \
-  --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_ \
+  --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_ \
   --outReadsUnmapped Fastx \
   --outSAMtype BAM SortedByCoordinate
-gzip {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_Unmapped.out.mate*
-/summer/epistorage/miniconda3/bin/samtools index {output.bam_file}
+gzip {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate*
+rm -Rf {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate1
+rm -Rf {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate2
+samtools index {output.bam_file}
     """
               
 rule count_classic:
     input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
-      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/{gtf_prefix}.gtf")
-    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{gtf_prefix}_stranded{stranded}_classiccounts.txt"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
+      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/{gtf_prefix}.gtf")
+    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt"
     priority: 50
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -120,13 +127,14 @@ rule count_classic:
 
 rule count_rmdup_stranded:
     input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.rmdup.bam",
-      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{index}/Annotation/Genes/{gtf_prefix}.gtf")
-    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{gtf_prefix}_stranded{stranded}_rmdupcounts.txt"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.rmdup.bam",
+      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/{gtf_prefix}.gtf")
+    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_rmdupcounts.txt"
     priority: 50
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
   {input.bam_file} \
   {input.gtf_file} \
   > {output}
@@ -136,10 +144,11 @@ rule count_rmdup_stranded:
 
 
 rule rmdup_bam:
-    input: "{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.rmdup.bam"
+    input: "{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.rmdup.bam"
     threads: 4
     shell:"""
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
 cd {wildcards.prefix}
 mkdir -p {wildcards.prefix}/tmp
 java -Djava.io.tmpdir={wildcards.prefix}/tmp -jar /summer/epistorage/miniconda3/share/picard-2.14-0/picard.jar \
@@ -147,7 +156,7 @@ java -Djava.io.tmpdir={wildcards.prefix}/tmp -jar /summer/epistorage/miniconda3/
   I={input} \
   O={output} \
   REMOVE_DUPLICATES=TRUE \
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.index}_output.metrics  2>&1>/dev/null
+  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_output.metrics  2>&1>/dev/null
 samtools index {output}
     """
 
@@ -156,13 +165,14 @@ samtools index {output}
 
 rule bigwig_coverage:
     input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bam",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_Aligned.sortedByCoord.out.bw"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bw"
     threads: 4
     shell:"""
-/summer/epistorage/miniconda3/bin/bamCoverage \
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+bamCoverage \
   -b {input.bam_file} \
-  --numberOfProcessors `echo "$(({threads} * 2))"` \
+  --numberOfProcessors {threads} \
   --binSize 10 \
   --minMappingQuality 30 \
   --normalizeUsingRPKM \
@@ -176,7 +186,8 @@ rule compile_blastdb:
     output: os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db")
     threads: 1
     shell:"""
-/summer/epistorage/miniconda3/bin/makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"    
+makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
 touch {output}
     """
     
@@ -187,19 +198,21 @@ rule blastn_ggaat:
     output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
     threads: 1
     shell:"""
-gunzip -c {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+gunzip -c {input.query_fqgz} | seqtk seq -A | 
+blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
 
 rule blastn_unmapped_ggaat:
     input:
       blast_db=os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db"),
-      query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{index}_Unmapped.out.mate1.gz",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{index}_{subject}.unmapblasted.txt.gz"
+      query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{version}_Unmapped.out.mate1.gz",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
-cat {input.query_fqgz} | /summer/epistorage/miniconda3/bin/seqtk seq -A | 
-/summer/epistorage/miniconda3/bin/blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
+export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+cat {input.query_fqgz} | seqtk seq -A | 
+blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
