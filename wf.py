@@ -114,7 +114,9 @@ rule count_classic:
     input:
       bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
       gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/{gtf_prefix}.gtf")
-    output: "{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt"
+    output: 
+      txt_file="{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt",
+      end_file="{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt"
     priority: 50
     threads: 2
     shell:"""
@@ -122,7 +124,8 @@ export PATH="/summer/epistorage/miniconda3/bin:$PATH"
 htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
   {input.bam_file} \
   {input.gtf_file} \
-  > {output}
+  > {output.txt_file}
+touch {output.end_file}
     """
 
 rule count_rmdup_stranded:
