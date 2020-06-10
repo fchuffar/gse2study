@@ -116,7 +116,7 @@ rule count_classic:
       gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/{gtf_prefix}.gtf")
     output: 
       txt_file="{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt",
-      end_file="{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt"
+      end_file="{prefix}/{sample}_{trim}_star_{species}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.end"
     priority: 50
     threads: 2
     shell:"""
