@@ -1,9 +1,9 @@
-# rsync -auvP ~/projects/heatshock/ luke:~/projects/heatshock/
+# rsync -auvP ~/projects/heatshock/ dahu:~/projects/heatshock/
 # cd ~/projects/heatshock/results/GSE100469
 source config
 echo $gse
 echo $project
-echo "rsync -auvP ~/projects/${project}/results/${gse}/ luke:~/projects/${project}/results/${gse}/"
+echo "rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/"
 echo "cd ~/projects/${project}/results/${gse}"
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
@@ -68,15 +68,15 @@ cat *.info
 
 
 ## qc align count
-# put wf on luke and launch
-rsync -auvP ~/projects/${project}/ luke:~/projects/${project}/
+# put wf on dahu and launch
+rsync -auvP ~/projects/${project}/ dahu:~/projects/${project}/
 snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 16 -pn
 snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 30 -pn
 
 
 ## get results
 mkdir -p ~/projects/datashare/${gse}/raw/
-rsync -auvP luke:~/projects/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
-rsync -auvP luke:~/projects/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
-rsync -auvP luke:~/projects/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
+rsync -auvP dahu:~/projects/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+rsync -auvP dahu:~/projects/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
+rsync -auvP dahu:~/projects/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
 
