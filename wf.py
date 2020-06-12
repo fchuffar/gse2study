@@ -9,6 +9,7 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
 
 localrules: target
 
+foo=version # patch for bug in target shell
 rule target:
     threads: 1
     message: "-- Rule target completed. --"
@@ -25,7 +26,7 @@ rule target:
 
     shell:"""
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
-  ~/projects/"""+datashare+"""/"""+gse+"""/*_notrim_star_"""+species+"""_"""+version+"""_Log.final.out \
+  ~/projects/"""+datashare+"""/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
   ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip \
 
 echo workflow \"align_heatshock\" completed at `date` 
