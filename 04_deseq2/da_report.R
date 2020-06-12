@@ -21,7 +21,7 @@ targetFile <- "design.txt"                           # path to the design/target
 
 write.table(data.frame(
   label = design$gsm,
-  files = paste0(design$gsm, "_notrim_star_Homo_sapiens_hg19_geneswchrm_strandedreverse_classiccounts.txt"),
+  files = paste0(design$gsm, "_notrim_star_", species, "_", version , "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"),
   cond = design$cond, 
   stringsAsFactors=FALSE
 ), targetFile,sep=" ", quote=FALSE, row.names=FALSE)
