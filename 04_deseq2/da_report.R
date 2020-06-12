@@ -33,7 +33,7 @@ featuresToRemove <- c("alignment_not_unique",        # names of the features to 
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
 
 varInt <- "cond"                                     # factor of interest
-condRef <- as.character(design[1,varInt])                                       # reference biological condition
+condRef <- as.character(levels(design[1,varInt]))                                       # reference biological condition
 batch <- NULL                                        # blocking factor: NULL (default) or "batch" for example
 
 fitType <- "parametric"                              # mean-variance relationship: "parametric" (default) or "local"
