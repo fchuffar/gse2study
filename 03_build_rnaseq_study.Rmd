@@ -13,7 +13,7 @@ output:
 
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
-genes = readRDS("~/projects/genes/bed_grch38_epimeddb.rds")
+genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
 source("config")
 study_filename = paste0("study_", gse, ".rds")
 ```
@@ -47,7 +47,7 @@ if (!file.exists("raw_counts.rds")) {
     # foo[,1] = NULL
     # return(foo)
   })
-  colnames(raw_counts) = do.call(rbind, strsplit(do.call(rbind, strsplit(unlist(count_files), "/"))[,7], "_"))[,1]
+  colnames(raw_counts) = do.call(rbind, strsplit(do.call(rbind, strsplit(unlist(count_files), "/"))[,7], "_notrim"))[,1]
   raw_counts = raw_counts[-((nrow(raw_counts)-4):nrow(raw_counts)),]
   head(raw_counts)
   tail(raw_counts)
@@ -56,7 +56,9 @@ if (!file.exists("raw_counts.rds")) {
 }
 raw_counts = readRDS("raw_counts.rds")
 
-tmp_genes = genes[!is.na(genes$gene_symb_wchrm),]
+# tmp_genes = genes[!is.na(genes$gene_symb_wchrm),]
+tmp_genes = genes[genes$gene_symb_wchrm %in% rownames(raw_counts),]
+dim(tmp_genes)
 idx = match(tmp_genes$gene_symb_wchrm, rownames(raw_counts))
 # rownames(raw_counts[idx,]) == tmp_genes$gene_symb_wchrm
 rownames(raw_counts)[idx] = rownames(tmp_genes)
@@ -67,7 +69,7 @@ dim(raw_counts)
 
 print("# build exp_grp from multiqc")
 exp_grp_mqc = read.table(paste0("~/projects/datashare/", gse, "/raw/multiqc_notrim_data/multiqc_star.txt"), sep="\t", header=TRUE, stringsAsFactors=FALSE)
-rownames(exp_grp_mqc) = do.call(rbind, strsplit(exp_grp_mqc$Sample, "_", fixed=TRUE))[,1]
+rownames(exp_grp_mqc) = do.call(rbind, strsplit(exp_grp_mqc$Sample, "_notrim", fixed=TRUE))[,1]
 sum(!rownames(exp_grp_mqc) %in% colnames(raw_counts))
 exp_grp_mqc = exp_grp_mqc[colnames(raw_counts),]
 rownames(exp_grp_mqc)
