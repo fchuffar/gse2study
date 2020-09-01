@@ -235,3 +235,32 @@ cp $tmpfile {output}
 rm $tmpfile
     """
 
+
+rule align_bowtie:
+    input:
+      fastq_info="{prefix}/{sample}_trim{trim}.info",
+    output:
+      log = "{prefix}/{sample}_{localendtoend}_trim{trim}.log",
+      bam = "{prefix}/{sample}_{localendtoend}_trim{trim}.bam",
+      srtbam = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam",
+      bai = "{prefix}/{sample}_{localendtoend}_trim{trim}_srt.bam.bai"
+    threads: 32
+    message:  "--- mapping with bowtie2 ---"
+    shell:    """
+PATH="/summer/epistorage/miniconda3/bin:$PATH"
+bowtie2 \
+  -t \
+  -p {threads} \
+  --{wildcards.localendtoend} \
+  --no-mixed \
+  --no-discordant \
+  -x  /home/fchuffar/projects/datashare/genomes/Mus_musculus/UCSC/mm10/Sequence/Bowtie2Index/genome \
+  `cat {input.fastq_info}` \
+  2> {output.log} \
+  | samtools view -bS - > {output.bam}
+  
+samtools sort -@ {threads} -T /dev/shm/{wildcards.sample}_{wildcards.localendtoend}_trim{wildcards.trim} -o {output.srtbam} {output.bam}
+samtools index {output.srtbam}
+cat {output.log}
+              """
+
