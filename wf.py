@@ -229,7 +229,7 @@ rule trim_fastxtoolkit:
     shell:"""
 tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
 echo computing $tmpfile ...
-gunzip -c  {input.fastq} | /summer/epistorage/miniconda3/envs/fastx-toolkit_env/bin/fastx_trimmer -l {wildcards.trim} -Q33 -o  -z -o $tmpfile
+gunzip -c  {input.fastq} | /summer/epistorage/miniconda3/envs/fastx-toolkit_env/bin/fastx_trimmer -l {wildcards.trim} -Q33 -z -o $tmpfile
 echo move $tmpfile to output.
 cp $tmpfile {output}
 rm $tmpfile
