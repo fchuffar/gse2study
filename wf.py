@@ -220,3 +220,18 @@ cat {input.query_fqgz} | seqtk seq -A |
 blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
 
+rule trim_fastxtoolkit:
+    input:
+      fastq="{prefix}.fastq.gz", 
+      fastqc="{prefix}_fastqc.zip",
+    output: "{prefix}_fastxtrimf{trim}.fastq.gz"
+    threads: 1
+    shell:"""
+tmpfile=$(mktemp /var/tmp/tmp_trimed_file_XXXXXXXXXX.fq.gz)
+echo computing $tmpfile ...
+gunzip -c  {input.fastq} | /summer/epistorage/miniconda3/envs/fastx-toolkit_env/bin/fastx_trimmer -l {wildcards.trim} -Q33 -o  -z -o $tmpfile
+echo move $tmpfile to output.
+cp $tmpfile {output}
+rm $tmpfile
+    """
+
