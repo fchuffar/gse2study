@@ -22,14 +22,14 @@ echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 
 ## download fastq files
 # wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
-sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
+sra=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
 echo $sra
-srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
+srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
 echo $srrs
 echo $srrs | wc
 
-mkdir -p ~/projects/datashare/${gse}/raw
-cd ~/projects/datashare/${gse}/raw
+mkdir -p ~/projects/${datashare}/${gse}/raw
+cd ~/projects/${datashare}/${gse}/raw
 
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
@@ -49,18 +49,18 @@ do
 done
 
 # SR or PE?
-ls -lha ~/projects/datashare/${gse}/raw
+ls -lha ~/projects/${datashare}/${gse}/raw
 sequencing_read_type=PE
 
 ## metadata linking sample and raw files
-gsms=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+gsms=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
 echo $gsms
 echo $gsms | wc
-cd ~/projects/datashare/${gse}/
+cd ~/projects/${datashare}/${gse}/
 for gsm in $gsms
 do
   echo ${gsm}  
-  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
   echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
 done
 cat *.info
@@ -75,8 +75,8 @@ snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 49 --cluster "oa
 
 
 ## get results
-mkdir -p ~/projects/datashare/${gse}/raw/
-rsync -auvP dahu:~/projects/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
-rsync -auvP dahu:~/projects/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
-rsync -auvP dahu:~/projects/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
+mkdir -p ~/projects/${datashare}/${gse}/raw/
+rsync -auvP dahu:~/projects/${datashare}/${gse}/*.txt ~/projects/${datashare}/${gse}/
+rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/*.html ~/projects/${datashare}/${gse}/raw/
+rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/multiqc_notrim* ~/projects/${datashare}/${gse}/raw/
 
