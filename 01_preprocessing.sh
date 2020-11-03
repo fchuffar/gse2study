@@ -1,4 +1,3 @@
-# rsync -auvP ~/projects/heatshock/results/GSE100469/ dahu:~/projects/heatshock/results/GSE100469/
 # cd ~/projects/heatshock/results/GSE100469
 source config
 echo "cd ~/projects/${project}/results/${gse}"
