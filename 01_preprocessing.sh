@@ -1,10 +1,10 @@
 # rsync -auvP ~/projects/heatshock/results/GSE100469/ dahu:~/projects/heatshock/results/GSE100469/
 # cd ~/projects/heatshock/results/GSE100469
 source config
+echo "cd ~/projects/${project}/results/${gse}"
 echo $gse
 echo $project
-echo "rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/"
-echo "cd ~/projects/${project}/results/${gse}"
+rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 # GSM2684046  Mock 1 4sU-RNA - Rep 1
