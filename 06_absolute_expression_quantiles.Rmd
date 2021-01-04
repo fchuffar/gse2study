@@ -1,0 +1,50 @@
+---
+title: "Absolute expression quantile"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+
+```{r results="verbatim"}
+d = read.table("04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE)
+d$lnorm.GSM1723639 = log2(d$norm.GSM1723639+1)
+d$lnorm.GSM1723640 = log2(d$norm.GSM1723640+1)
+
+layout(matrix(1:2,1), respect=TRUE)
+plot(d$norm.GSM1723639, d$norm.GSM1723640)
+plot(d$lnorm.GSM1723639, d$lnorm.GSM1723640)
+
+d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
+d = d[!is.na(d$mean.scru) & d$mean.scru>0,]
+plot(density(d$mean.scru))
+probs = c(0,.25,.5,.75,1)
+# probs = c(0, .05, .25, .5, .75, .95, 1)
+q = quantile(d$mean.scru, probs=probs)
+abline(v=q, lty=2, col="grey")
+d$q_expr = as.numeric(cut(d$mean.scru, q, include.lowest=TRUE))
+d[,c("mean.scru", "q_expr")]
+dim(d)
+```
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
