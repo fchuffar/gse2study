@@ -19,26 +19,70 @@ source("config")
 
 
 ```{r results="verbatim"}
-d = read.table("04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE)
+genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+genes = genes[genes$type %in% "protein-coding",]
+dim(genes)
+d = read.table("04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE, stringsAsFactors=FALSE)
 d$lnorm.GSM1723639 = log2(d$norm.GSM1723639+1)
 d$lnorm.GSM1723640 = log2(d$norm.GSM1723640+1)
+d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
+d = d[
+  !is.na(d$mean.scru) & 
+  d$mean.scru>0 & 
+  d$Id %in% rownames(genes),
+]
+
 
 layout(matrix(1:2,1), respect=TRUE)
-plot(d$norm.GSM1723639, d$norm.GSM1723640)
 plot(d$lnorm.GSM1723639, d$lnorm.GSM1723640)
-
-d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
-d = d[!is.na(d$mean.scru) & d$mean.scru>0,]
 plot(density(d$mean.scru))
 probs = c(0,.25,.5,.75,1)
 # probs = c(0, .05, .25, .5, .75, .95, 1)
 q = quantile(d$mean.scru, probs=probs)
 abline(v=q, lty=2, col="grey")
 d$q_expr = as.numeric(cut(d$mean.scru, q, include.lowest=TRUE))
-d[,c("mean.scru", "q_expr")]
+head(d)
 dim(d)
 ```
 
+# export bed file
+
+```{r}
+set.seed(1)
+nb_genes = 1000
+table(d$q_expr, useNA="ifany")
+for (i in sort(unique(d$q_expr))) {
+  prefix = paste0("abs_expr_q", i, "_", nb_genes)
+  feat = genes[sample(d$Id[d$q_expr %in% i], nb_genes),]
+  # feat = feat[!is.na(feat$tx_end),]
+  # feat = feat[nchar(feat$chrom_text) <=5,]
+  # print(dim(feat))
+  # table(feat$type, useNA="ifany")
+  # table(feat$chrom_text, useNA="ifany")
+  #
+  # # tss
+  # table(feat$strand, useNA="ifany")
+  # feat$tss = NA
+  # feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
+  # feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
+  # feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
+  # sum(duplicated(feat$tss_key))
+  # feat = feat[!duplicated(feat$tss_key),]
+  # dim(feat)
+  #
+  # unique(feat[,1])
+  #
+  # feat[feat[,1]=="chrMT",1] = "chrM"
+  # unique(feat[,1])
+  #
+  #
+  # feat = feat[feat$type,]
+  regions_filenames = regions_filename = paste0(prefix, ".bed")
+  write.table(feat[,1:6], file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)  
+}
+
+
+```
 
 # Session Information
 
