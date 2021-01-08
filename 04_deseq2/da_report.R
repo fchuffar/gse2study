@@ -27,7 +27,7 @@ write.table(data.frame(
 ), targetFile,sep=" ", quote=FALSE, row.names=FALSE)
 
 
-rawDir <- paste0("~/projects/datashare/", gse)                                      # path to the directory containing raw counts files
+rawDir <- paste0("~/projects/", datashare, "/", gse)                                      # path to the directory containing raw counts files
 featuresToRemove <- c("alignment_not_unique",        # names of the features to be removed
                       "ambiguous", "no_feature",     # (specific HTSeq-count information and rRNA for example)
                       "not_aligned", "too_low_aQual")# NULL if no feature to remove
