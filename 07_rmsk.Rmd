@@ -1,0 +1,293 @@
+---
+title: "Repeated sequences using RepeatMasker track"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+Lerat E, Casacuberta J, Chaparro C, Vieira C (2019) 
+On the Importance to Acknowledge Transposable Elements in Epigenomic Analyses, Genes, vol. 10 pp.258-258.
+
+
+
+```{r label="features"}
+# https://zenbu-wiki.gsc.riken.jp/zenbu/wiki/index.php/Uploading_UCSC_repetitive_elements_track
+# downloading UCSC rmsk data as BED
+# BED formatted UCSC track content can be obtained from UCSC table broswer.
+# The rmsk RepeatMasker (rmsk) track can be exported as BED file by selecting
+#
+# the assembly "Feb.2009 GRCh37/hg19"
+# the group "repeats and variations"
+# the track "RepeatMasker"
+# and finally the table "rmsk"
+# As we desire the complete repetitive elements genome-wide to be loaded into ZENBU, therefore we select
+#
+# region: "genome"
+# ZENBU enable gzip compressed bed files to be loaded directly, so we will further select :
+#
+# output format: "BED - browser extensibke format"
+# output file: we will name the file "UCSC_rmsk.hg19.bed.gz"
+# file type returned: "gzip compressed"
+
+if (!exists("rmsk_raw")) {
+  rmsk_raw = read.table("~/projects/small_structs/data/rmsk.mm10.bed", skip=1, stringsAsFactors=FALSE)
+}
+rmsk = rmsk_raw
+
+sat2_feat = rmsk[rmsk[,4] %in% c("GSAT_MM","SYNREP_MM"),]#, "(CTGTG)n"),]#
+sat2_feat_saf = sat2_feat[1:5]
+colnames(sat2_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+sat2_feat_saf[,1] = paste0(sat2_feat[,4])
+# sat2_feat_saf[,1] = paste0(sat2_feat[,4], "_", sat2_feat[,1], ":", sat2_feat[,2], "-", sat2_feat[,3])
+sat2_feat_saf[,2] = sat2_feat[,1]
+sat2_feat_saf[,3] = sat2_feat[,2]
+sat2_feat_saf[,4] = sat2_feat[,3]
+sat2_feat_saf[,5] = sat2_feat[,6]
+sat2_feat_saf = rbind(sat2_feat_saf, list("Rn45s", "chr17", 39842997, 39848829, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("Sfi1", "chr11", 3126500, 3200500, "-"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr10:3109000-3117000", "chr10", 3109000, 3117000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr9:124256000-124260001", "chr9", 124256000, 124258000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr15:75085500-75087000", "chr15", 75085500, 75087000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr13:119596000-119603000", "chr13", 119596000, 119603000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr11:3125000-3200000", "chr11", 3125000, 3200000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr10:3110000-3120000", "chr10", 3110000, 3120000, "+"))
+# sat2_feat_saf = rbind(sat2_feat_saf, list("chr1:84950000-85650000", "chr1", 84950000, 85650000, "+"))
+
+head(sat2_feat_saf)
+# sat2_feat_saf
+# write.table(sat2_feat_saf, file="sat2_feat.saf", sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+
+
+
+transcripts_feat = readRDS("~/projects/genes/bed_grcm38_transcripts_epimeddb_entrez.rds")
+transcripts_feat = transcripts_feat[!is.na(transcripts_feat$tx_end),]
+transcripts_feat = transcripts_feat[nchar(transcripts_feat$chrom_text) <=5,]
+table(transcripts_feat$type, useNA="ifany")
+table(transcripts_feat$chrom_text, useNA="ifany")
+
+
+library(bedr)
+foo = sat2_feat
+foo = foo[nchar(foo[,1])<6,]
+foo = foo[order(foo[,1], foo[,2]),]
+bar = transcripts_feat[,1:6]
+bar = bar[order(bar[,1], bar[,2]),]
+b.int1 <- bedr.join.region(foo, bar);
+transcripts_feat = transcripts_feat[!transcripts_feat$gene_symbol %in% b.int1$gene_symbol,]
+
+transcripts_feat_saf = transcripts_feat[1:5]
+
+
+colnames(transcripts_feat_saf) = c("GeneID", "Chr", "Start", "End", "Strand")
+transcripts_feat_saf[,1] = paste0(transcripts_feat[,4])
+transcripts_feat_saf[,1] = "transcripts"
+# transcripts_feat_saf[,1] = paste0(transcripts_feat[,4], "_", transcripts_feat[,1], ":", transcripts_feat[,2], "-", transcripts_feat[,3])
+transcripts_feat_saf[,2] = transcripts_feat[,1]
+transcripts_feat_saf[,3] = transcripts_feat[,2]
+transcripts_feat_saf[,4] = transcripts_feat[,3]
+transcripts_feat_saf[,5] = transcripts_feat[,6]
+
+head(transcripts_feat_saf, 50)
+
+
+
+
+
+
+
+
+
+
+mixed_feat_saf = rbind(sat2_feat_saf, transcripts_feat_saf)
+head(mixed_feat_saf)
+tail(mixed_feat_saf)
+dim(mixed_feat_saf)
+prefix = "rmsk"
+write.table(mixed_feat_saf, file=paste0(prefix, ".saf"), sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)
+```
+
+```{r label="featureCounts"}
+mmq=0
+cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
+args = paste0(
+  "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
+  # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih36_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih37_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih38_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih39_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih40_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no31_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no32_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no33_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no34_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no35_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  ""
+)
+print(paste(cmd, args))
+system2(cmd, args)
+system2("cat", paste0(prefix, "_count_", mmq, ".txt.summary"))
+
+# stop("EFN")
+```
+
+```{r label="normalization"}
+if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
+counts_summary = read.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
+rownames(counts_summary) = counts_summary[,1]
+counts_summary = counts_summary[,-1]
+colnames(counts_summary) = substr(colnames(counts_summary), 68, 71)
+print(counts_summary)
+
+counts = mread.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
+rownames(counts) = counts[,1]
+counts = counts[,-(1:6)]
+colnames(counts) = substr(colnames(counts), 68, 71)
+print(counts)
+
+
+counts = rbind(counts, counts_summary)
+counts = as.matrix(counts)
+counts
+
+nb_reads_total = (counts["Assigned",] + counts["Unassigned_NoFeatures",] + counts["Unassigned_Unmapped",])
+nb_reads_aligned = (counts["Assigned",] + counts["Unassigned_NoFeatures",])
+
+# counts[-((nrow(counts) - 11):nrow(counts)),]
+# counts[((nrow(counts) - 11):nrow(counts)),]
+# counts[1,] / nb_reads_total[1]
+# t(counts[-((nrow(counts) - 11):nrow(counts)),]) / nb_reads_total
+# (t(counts[-((nrow(counts) - 11):nrow(counts)),]) / nb_reads_total)[1,]
+
+counts_oi = t(counts[-((nrow(counts) - 11):nrow(counts)),])
+
+counts_oi = cbind(counts_oi, unassigned=counts["Unassigned_NoFeatures",], unmapped=counts["Unassigned_Unmapped",])
+# counts_oi = cbind(counts_oi, noFeat=counts["Unassigned_NoFeatures",])
+
+rpm_total = log2(
+  t((
+   counts_oi / nb_reads_total * 1000000
+  ))
++ 1)
+rpm_aligned = log2(
+  t((
+   counts_oi / nb_reads_aligned * 1000000
+  ))
++ 1)
+head(rpm_aligned)
+```
+
+
+
+```{r label="boxplots"}
+stages = c("ih36","ih37","ih38","ih39","ih40","no31","no32","no33","no34","no35")
+grps = c(
+  "unassigned", 
+  "unmapped",
+  "GSAT_MM", 
+  "SYNREP_MM", 
+  "transcripts", 
+  "Rn45s"
+)
+
+rpm_aligned = rpm_aligned[grps,stages]
+rpm_total = rpm_total[grps,stages]
+                
+
+
+
+palette(rev(RColorBrewer::brewer.pal(8, name="Paired")))
+layout(matrix(1:2, 1), respect=TRUE)
+tmp_fact =factor(rownames(rpm_aligned), levels=rownames(rpm_aligned))
+matplot(t(rpm_aligned), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (aligned)", xlab="", main=prefix)
+# legend("topright", col=1:length(levels(tmp_fact)), lty=1, levels(tmp_fact))
+axis(1, 1:ncol(rpm_aligned), colnames(rpm_aligned), las=2)
+plot(0,0,xaxt="n", yaxt="n", xlab="", ylab="", bty="n")
+legend("topright", col=1:length(levels(tmp_fact)), lty=1, levels(tmp_fact))
+# matplot(t(rpm_total), type="l", lty=1, col=adjustcolor(as.numeric(tmp_fact), alpha.f=1), xaxt="n", ylab="log2(RPM + 1) (total)", xlab="", main=prefix)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+# layout(1, respect=TRUE)
+# for (k in 1:3) {
+#   cond = factor(
+#     c("P_mns", "R_mns", "C_nuc", "C_sms", "S_nuc_12", "S_nuc_4", "S_nuc_12", "S_ss_12", "S_ss_4", "S_int_4"),
+#     levels = c("P_mns", "R_mns", "C_nuc", "C_sms", "S_nuc_4", "S_nuc_12", "S_int_4", "S_int_12", "S_ss_4", "S_ss_12")
+#   )
+#   d = data.frame(rpm=rpm_aligned[k,], cond=cond)
+#   b = boxplot(rpm~cond, d, las=2, ylim=c(0,16), ylab="log2(RPM + 1) (aligned)", border=k, add=k!=1)
+#   # lines(b$stats[3,])
+# }
+# legend("topright", col=1:3, lty=1, rownames(rpm_aligned)[1:3])
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
