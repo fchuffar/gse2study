@@ -229,6 +229,26 @@ head(s$platform)
 dim(s$platform)
 ```
 
+# Experiment grouping
+
+```{r}
+geo_sub = data.frame(
+  sample_name=s$exp_grp$Sample,
+  title=s$exp_grp$Sample,
+  # source_name="liver",
+  # organism=species,
+  # rat=s$exp_grp$sample,
+  # treatment=s$exp_grp$treatment,
+  # collection_week=as.character(s$exp_grp$week),
+  # tumor_status=s$exp_grp$tumor,
+  # # processed_data_file=,
+  # # raw_file=
+  processed_data_file=paste0(s$exp_grp$Sample, "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt")
+)
+head(geo_sub)
+WriteXLS::WriteXLS(geo_sub, "exp_grp.xlsx")
+```
+
 
 
 # Session Information
