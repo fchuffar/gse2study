@@ -90,8 +90,7 @@ rule align_trimed:
       star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Sequence/StarIndex"),
       gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/UCSC/{version}/Annotation/Genes/"+gtf_prefix+".gtf"),
     output:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
-      unmapped_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Unmapped.out.mate1.gz"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam"
     threads: 32
     shell:"""
 export PATH="/summer/epistorage/miniconda3/bin:$PATH"
@@ -103,11 +102,7 @@ STAR \
   --readFilesCommand gunzip -c \
   --readFilesIn `cat {input.fastqc_info}` \
   --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_ \
-  --outReadsUnmapped Fastx \
   --outSAMtype BAM SortedByCoordinate
-gzip {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate*
-rm -Rf {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate1
-rm -Rf {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Unmapped.out.mate2
 samtools index {output.bam_file}
     """
               
