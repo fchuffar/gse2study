@@ -1,23 +1,49 @@
-# cd ~/projects/heatshock/results/GSE100469
+cd ~/projects/nme2/results/GSE101657
 source config
-echo "cd ~/projects/${project}/results/${gse}"
 echo $gse
 echo $project
 rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
-# GSM2684046  Mock 1 4sU-RNA - Rep 1
-# GSM2684047  Mock 2 4sU-RNA - Rep 1
-# GSM2684048  0-1 h Salt stress 4sU-RNA - Rep 1
-# GSM2684049  1-2 h Salt stress 4sU-RNA - Rep 1
-# GSM2684050  0-1 h Heat stress 4sU-RNA - Rep 1
-# GSM2684051  1-2 h Heat stress 4sU-RNA - Rep 1
-# GSM2684052  Mock 1 4sU-RNA - Rep 2
-# GSM2684053  Mock 2 4sU-RNA - Rep 2
-# GSM2684054  0-1 h Salt stress 4sU-RNA - Rep 2
-# GSM2684055  1-2 h Salt stress 4sU-RNA - Rep 2
-# GSM2684056  0-1 h Heat stress 4sU-RNA - Rep 2
-# GSM2684057  1-2 h Heat stress 4sU-RNA - Rep 2
+
+# GSM2711588  Liver_Control_Diet0
+# GSM2711589  Liver_Control_Diet1
+# GSM2711590  Liver_Control_Diet2
+# GSM2711591  Liver_Control_Diet3
+# GSM2711592  Liver_Control_Diet4
+# GSM2711593  Liver_HF_High_Fat0
+# GSM2711594  Liver_HF_High_Fat1
+# GSM2711595  Liver_HF_High_Fat2
+# GSM2711596  Liver_HF_High_Fat3
+# GSM2711597  Liver_HF_High_Fat4
+# GSM2711598  Liver_HF_High_Fat5
+# GSM2711599  Liver_KD_Ketogenic0
+# GSM2711600  Liver_KD_Ketogenic1
+# GSM2711601  Liver_KD_Ketogenic2
+# GSM2711602  Liver_KD_Ketogenic3
+# GSM2711603  Liver_KD_Ketogenic4
+# GSM2711604  Liver_KD_Ketogenic5
+# GSM2711605  Liver_KD_Ketogenic6
+# GSM2711606  Kidney_Control_Diet0
+# GSM2711607  Kidney_Control_Diet1
+# GSM2711608  Kidney_Control_Diet2
+# GSM2711609  Kidney_Control_Diet3
+# GSM2711610  Kidney_Control_Diet4
+# GSM2711611  Kidney_HF_High_Fat0
+# GSM2711612  Kidney_HF_High_Fat1
+# GSM2711613  Kidney_HF_High_Fat2
+# GSM2711614  Kidney_HF_High_Fat3
+# GSM2711615  Kidney_HF_High_Fat4
+# GSM2711616  Kidney_HF_High_Fat5
+# GSM2711617  Kidney_KD_Ketogenic0
+# GSM2711618  Kidney_KD_Ketogenic1
+# GSM2711619  Kidney_KD_Ketogenic2
+# GSM2711620  Kidney_KD_Ketogenic3
+# GSM2711621  Kidney_KD_Ketogenic4
+# GSM2711622  Kidney_KD_Ketogenic5
+# GSM2711623  Kidney_KD_Ketogenic6
+
+
 
 
 ## download fastq files
@@ -50,7 +76,7 @@ done
 
 # SR or PE?
 ls -lha ~/projects/${datashare}/${gse}/raw
-sequencing_read_type=PE
+sequencing_read_type=SR
 
 ## metadata linking sample and raw files
 gsms=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
