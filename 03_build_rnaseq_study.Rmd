@@ -58,7 +58,7 @@ Normalization and differential analysis were performed using the R software [R C
 
 DESeq2 tables could be read using the following command line : 
 
-```
+```{r eval=FALSE}
 table_file = "04_deseq2/tables/nme2kohghfatvsnme2wtnormal.complete.txt"
 desq2_outputs = read.table(table_file, header=TRUE)
 rownames(desq2_outputs) = desq2_outputs$Id
