@@ -44,6 +44,7 @@ das = list()
 # layout(matrix(1:10, 2, byrow=FALSE), respect=TRUE)
 for (prefix in prefixes) {
   table_file = paste0(prefix, ".txt")
+  print(paste("differential analysis results were exported in", table_file, "file."))
   # res = mread.table(table_file, header=TRUE)
   res = read.table(table_file, header=TRUE)
   rownames(res) = res$Id
