@@ -1,0 +1,86 @@
+---
+title: "Boxplots"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+```
+
+```{r}
+hg_genes = c( 
+  "ATAD2",
+  "ASF1A", 
+  "ASF1B", 
+  "SUPT16H", 
+  "SSRP1", 
+  "MCM2", 
+  "NASP", 
+  "HJURP", 
+  "DAXX", 
+  "HIRA", 
+  "CABIN1", 
+  "UBN1", 
+  "RBBP4", 
+  "CHAF1A", 
+  "CHAF1B"
+)
+
+homologene_tab = homologene::homologene(hg_genes, inTax=9606, outTax=10090)
+homologene_tab
+hg_genes %in% homologene_tab[,1]
+mm_genes = homologene_tab[,2]
+
+mm_genes = c(mm_genes, "Prm1", "Prm2", "Tnp1", "Tnp2", "H2afb1", "Nutm1")
+
+table_file = "04_deseq2/tables/d20wtvsd20ko.complete.txt"
+daresults = read.table(table_file, header=TRUE)
+rownames(daresults) = daresults$Id
+
+mm_genes %in% rownames(daresults)
+
+"Tnp1" %in% rownames(daresults)
+
+
+col_idx = colnames(daresults)[grep("norm", colnames(daresults))]
+
+norm_data = as.matrix(log2(daresults[mm_genes,col_idx]+1))
+colnames(norm_data)
+
+
+day = substr(colnames(norm_data), 6,8)
+day
+
+line = substr(colnames(norm_data), 10,11)
+line = factor(line, levels=rev(unique(line)))
+line
+
+d = cbind(data.frame(day=day, line=line), t(norm_data))
+
+for (g in mm_genes) {
+  print(g)
+  par(mar=c(7.5, 4.1, 4.1, 2.1))
+  layout(1, respect=1)
+  model = paste0(g, "~line+day")
+  boxplot(formula(model), d, main=model, las=2, xlab="", ylab="log2(norm_read_count + 1)", col=c(2,4))  
+}
+```
+
+
+# Session Information
+
+```{r, results="verbatim"}
+sessionInfo()
+```
+
+
+
