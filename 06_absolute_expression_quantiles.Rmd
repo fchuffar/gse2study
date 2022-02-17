@@ -18,69 +18,90 @@ source("config")
 ```
 
 
-```{r results="verbatim"}
+```{r define quantiles, results="verbatim"}
 genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
 genes = genes[genes$type %in% "protein-coding",]
 dim(genes)
-d = read.table("04_deseq2/tables/siATAD2vssiSCRUM.complete.txt", header=TRUE, stringsAsFactors=FALSE)
-d$lnorm.GSM1723639 = log2(d$norm.GSM1723639+1)
-d$lnorm.GSM1723640 = log2(d$norm.GSM1723640+1)
-d$mean.scru = (d$lnorm.GSM1723639 + d$lnorm.GSM1723640) / 2
+
+
+# Loading full data matrix
+table_file = list.files("04_deseq2/tables/", "*.complete.txt", full.names=TRUE)[1]
+d = read.table(table_file, header=TRUE)
+rownames(d) = d$Id
+keys = colnames(d)[grep("norm.", colnames(d), fixed=TRUE)]
+
+d$mean.scru = log2((d[,keys[1]] + d[,keys[2]] + d[,keys[3]] + d[,keys[4]]) / 4 + 1)
 d = d[
   !is.na(d$mean.scru) & 
-  d$mean.scru>0 & 
   d$Id %in% rownames(genes),
 ]
+dim(d)
 
+
+d_filtered = d[
+  d$mean.scru>0,
+]
+dim(d_filtered)
 
 layout(matrix(1:2,1), respect=TRUE)
-plot(d$lnorm.GSM1723639, d$lnorm.GSM1723640)
-plot(density(d$mean.scru))
+pairs(d_filtered[,keys[1:4]])
+plot(density(d_filtered$mean.scru))
 probs = c(0,.25,.5,.75,1)
 # probs = c(0, .05, .25, .5, .75, .95, 1)
-q = quantile(d$mean.scru, probs=probs)
+q = quantile(d_filtered$mean.scru, probs=probs)
 abline(v=q, lty=2, col="grey")
-d$q_expr = as.numeric(cut(d$mean.scru, q, include.lowest=TRUE))
-head(d)
-dim(d)
+d_filtered$q_expr = as.numeric(cut(d_filtered$mean.scru, q, include.lowest=TRUE))
+head(d_filtered)
+dim(d_filtered)
+# d[,1:6s]
+
+d$q_expr = 0
+d[rownames(d_filtered),]$q_expr = d_filtered$q_expr
+table(d$q_expr)
+
+
 ```
 
 # export bed file
 
-```{r}
-set.seed(1)
-nb_genes = 1000
-table(d$q_expr, useNA="ifany")
-for (i in sort(unique(d$q_expr))) {
-  prefix = paste0("abs_expr_q", i, "_", nb_genes)
-  feat = genes[sample(d$Id[d$q_expr %in% i], nb_genes),]
-  # feat = feat[!is.na(feat$tx_end),]
-  # feat = feat[nchar(feat$chrom_text) <=5,]
-  # print(dim(feat))
-  # table(feat$type, useNA="ifany")
-  # table(feat$chrom_text, useNA="ifany")
-  #
-  # # tss
-  # table(feat$strand, useNA="ifany")
-  # feat$tss = NA
-  # feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
-  # feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
-  # feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
-  # sum(duplicated(feat$tss_key))
-  # feat = feat[!duplicated(feat$tss_key),]
-  # dim(feat)
-  #
-  # unique(feat[,1])
-  #
-  # feat[feat[,1]=="chrMT",1] = "chrM"
-  # unique(feat[,1])
-  #
-  #
-  # feat = feat[feat$type,]
-  regions_filenames = regions_filename = paste0(prefix, ".bed")
-  write.table(feat[,1:6], file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)  
+```{r export}
+for (nb_genes in (0:floor(min(table(d$q_expr))/1000))*1000) {
+  for (i in sort(unique(d$q_expr))) {
+    prefix = paste0("abs_expr_q", i, "_", nb_genes)
+    if (nb_genes > 0) {
+      set.seed(1)
+      feat = genes[sample(as.character(d[d$Id %in% rownames(genes) & d$q_expr %in% i,]$Id), nb_genes),]    
+    } else {
+      feat = genes[as.character(d[d$Id %in% rownames(genes) & d$q_expr %in% i,]$Id),]        
+    }
+    feat[,1:6]
+    # feat = feat[!is.na(feat$tx_end),]
+    # feat = feat[nchar(feat$chrom_text) <=5,]
+    # print(dim(feat))
+    # table(feat$type, useNA="ifany")
+    # table(feat$chrom_text, useNA="ifany")
+    #
+    # # tss
+    # table(feat$strand, useNA="ifany")
+    # feat$tss = NA
+    # feat[feat$strand == "+",]$tss = feat[feat$strand == "+",2]
+    # feat[feat$strand == "-",]$tss = feat[feat$strand == "-",3]
+    # feat$tss_key = paste0(feat$chrom_text, "_", feat$tss)#, "_", feat$strand)
+    # sum(duplicated(feat$tss_key))
+    # feat = feat[!duplicated(feat$tss_key),]
+    # dim(feat)
+    #
+    # unique(feat[,1])
+    #
+    # feat[feat[,1]=="chrMT",1] = "chrM"
+    # unique(feat[,1])
+    #
+    #
+    # feat = feat[feat$type,]
+    regions_filenames = regions_filename = paste0(prefix, ".bed")
+    write.table(feat[,1:6], file=regions_filename, sep="\t", quote=FALSE,row.names=FALSE, col.names=FALSE)  
+  }
 }
-
 
 ```
 
