@@ -1,0 +1,101 @@
+---
+title: "Material and Methods"
+author: "Florent Chuffart"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+---
+
+
+```{r, echo=FALSE, eval=TRUE}
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
+```
+
+
+
+# Material and Methods
+
+
+
+## Sequencing
+
+**FOLLOWING CONCERNS TGML PLATFORM** Total RNA was purified by trizol extraction followed by Qiagen RNeasy mini kit protocol. 
+Removal of most rRNA was proceeded using NEBNext rRNA Depletion Kit Ribodepletion. 
+Quality was verified by Agilent Bioanalyzer 2100. 
+Libraries were prepared using NEBNext Ultra Directional RNA Library Prep kit for Illumina.
+Base calling was performed using RTA version 2.*
+
+Total RNA was purified by XXX.
+Removal of most rRNA was proceeded using XXX.
+Quality was verified by XXX. 
+Libraries were prepared using XXX.
+Base calling was performed XXX.
+
+Stranded paired-end 2x75bp reads were produced by Illumina NextSeq500. 
+
+**Alignment**
+
+The fastq files were aligned on the `r annotation` `r version` genome using `STAR` (2.7.1a) [PMID:23104886] to produce bam files.
+
+**Counts**
+
+Bam files were counted using `HTSeq` framework (0.11.2) [PMID:25260700], with options:** -t exon -f bam -r pos --stranded=`r strand` -m intersection-strict --nonunique none
+
+
+**Normalization and differential analysis**
+
+Normalization and differential analysis were performed using the R software [R Core Team. R: A language and environment for statistical computing. Vienna, Austria : R Foundation for Statistical Computing, 2017], `DESeq2` (1.22.2) [PMID:20979621, PMID:25516281] and `SARTools` [PMID:27280887] packages.
+
+
+**Quartile of expression**
+
+We filtered non-zero counts protein-coding genes from NCBI Reference Sequence Database (RefSeq) and we organise genes by quartile of aboslute DESeq2 normalized expression in WT NFD 4 replicates. Quartile of expression genes were exported as bed files.
+
+[abs_expr_q1_0.bed](./abs_expr_q1_0.bed) 
+[abs_expr_q2_0.bed](./abs_expr_q2_0.bed)
+[abs_expr_q3_0.bed](./abs_expr_q3_0.bed)
+[abs_expr_q4_0.bed](./abs_expr_q4_0.bed)
+
+
+
+
+
+
+# Session Information
+
+```{r results="verbatim"}
+sessionInfo()
+date()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
