@@ -40,21 +40,21 @@ Stranded paired-end 2x75bp reads were produced by Illumina NextSeq500.
 
 **Alignment**
 
-The fastq files were aligned on the `r annotation` `r version` genome using `STAR` (2.7.1a) [PMID:23104886] to produce bam files.
+The sequenced reads from the raw sequence (.fastq files) were aligned on the `r annotation` `r version` genome using `STAR` (2.7.1a) [PMID:23104886] to produce bam files.
 
 **Counts**
 
-Bam files were counted using `HTSeq` framework (0.11.2) [PMID:25260700], with options:** -t exon -f bam -r pos --stranded=`r strand` -m intersection-strict --nonunique none
+The aligned reads (.bam files) were counted using `HTSeq` framework (0.11.2) [PMID:25260700], with options:** -t exon -f bam -r pos --stranded=`r strand` -m intersection-strict --nonunique none
 
 
 **Normalization and differential analysis**
 
-Normalization and differential analysis were performed using the R software [R Core Team. R: A language and environment for statistical computing. Vienna, Austria : R Foundation for Statistical Computing, 2017], `DESeq2` (1.22.2) [PMID:20979621, PMID:25516281] and `SARTools` [PMID:27280887] packages.
+The normalization, pseudo-log transformation of the read counts, and the differential analysis were performed using the R software [R Core Team. R: A language and environment for statistical computing. Vienna, Austria : R Foundation for Statistical Computing, 2017], `DESeq2` (1.22.2) [PMID:20979621, PMID:25516281] and `SARTools` [PMID:27280887] packages.
 
 
-**Quartile of expression**
+**Grouping genes/features according to their quartile of expression**
 
-We filtered non-zero counts protein-coding genes from NCBI Reference Sequence Database (RefSeq) and we organise genes by quartile of aboslute DESeq2 normalized expression in WT NFD 4 replicates. Quartile of expression genes were exported as bed files.
+The features corresponding to non-coding transcripts and/or with zero counts were filtered out, in order to retain all non-zero counts protein-coding genes from NCBI Reference Sequence Database (RefSeq). The corresponding genes and features were ranked according to their DESeq2 normalized expression mean value in the samples corresponding to the 4 replicates of liver from wild-type mice under normal diet, and allocated into four subsets corresponding to the quartiles of this expression and exported as .bed files.
 
 [abs_expr_q1_0.bed](./abs_expr_q1_0.bed) 
 [abs_expr_q2_0.bed](./abs_expr_q2_0.bed)
