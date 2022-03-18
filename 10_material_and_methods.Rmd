@@ -68,6 +68,9 @@ The normalized, pseudo-log transformed and standardized read counts of the up an
 
 
 
+# Grant and Acknowledgements
+
+All (or most of) the computations presented in this paper were performed using the GRICAD infrastructure (https://gricad.univ-grenoble-alpes.fr), which is supported by Grenoble research communities.
 
 
 # Session Information
