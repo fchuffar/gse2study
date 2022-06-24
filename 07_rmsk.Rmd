@@ -13,6 +13,7 @@ output:
 
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+source("config")
 ```
 
 Lerat E, Casacuberta J, Chaparro C, Vieira C (2019) 
@@ -122,16 +123,30 @@ cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
   "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
   # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih36_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih37_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih38_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih39_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/ih40_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no31_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no32_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no33_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no34_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
-  "~/projects/datashare_epistorage/temporize_rnaseq_mgx/no35_notrim_notrim_star_Mus_musculus_mm10_Aligned.sortedByCoord.out.bam ", 
+  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d24_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d24_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d24_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d24_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d26_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d26_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d26_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste0("~/projects/", datashare, "/", gse, "/d26_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
   ""
 )
 print(paste(cmd, args))
