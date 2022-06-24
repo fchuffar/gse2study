@@ -118,35 +118,39 @@ write.table(mixed_feat_saf, file=paste0(prefix, ".saf"), sep="\t", quote=FALSE,r
 ```
 
 ```{r label="featureCounts"}
+bams = c(
+  paste0("d20_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d20_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d22_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d24_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d24_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d24_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d24_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d26_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d26_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d26_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  paste0("d26_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam"), 
+  NULL  
+)
 mmq=0
 cmd = "/summer/epistorage/miniconda3/envs/subread_env/bin/featureCounts"
 args = paste0(
   "-a ", prefix, ".saf -M -F SAF -s 2 -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ", 
   # "-a ", prefix, ".saf -F SAF --largestOverlap -Q ", mmq, " -T 8 -o ", prefix, "_count_", mmq, ".txt ",
-  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d20_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_ko_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep3_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d22_wt_rep4_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d24_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d24_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d24_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d24_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d26_ko_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d26_ko_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d26_wt_rep1_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
-  paste0("~/projects/", datashare, "/", gse, "/d26_wt_rep2_notrim_star_", species, "_", version, "_Aligned.sortedByCoord.out.bam "), 
+  paste(paste0("~/projects/", datashare, "/", gse, "/", bams), collapse=" "),
   ""
 )
 print(paste(cmd, args))
@@ -161,13 +165,13 @@ if (!exists("mread.table")) {mread.table = memoise::memoise(read.table)}
 counts_summary = read.table(paste0(prefix, "_count_", mmq, ".txt.summary"), header=TRUE)
 rownames(counts_summary) = counts_summary[,1]
 counts_summary = counts_summary[,-1]
-colnames(counts_summary) = substr(colnames(counts_summary), 68, 71)
+colnames(counts_summary) = substr(colnames(counts_summary), 54, 59)
 print(counts_summary)
 
 counts = mread.table(paste0(prefix, "_count_", mmq, ".txt"), header=TRUE)
 rownames(counts) = counts[,1]
 counts = counts[,-(1:6)]
-colnames(counts) = substr(colnames(counts), 68, 71)
+colnames(counts) = substr(colnames(counts), 54, 59)
 print(counts)
 
 
@@ -205,7 +209,8 @@ head(rpm_aligned)
 
 
 ```{r label="boxplots"}
-stages = c("ih36","ih37","ih38","ih39","ih40","no31","no32","no33","no34","no35")
+
+stages = unique(substr(bams, 1, 6))
 grps = c(
   "unassigned", 
   "unmapped",
