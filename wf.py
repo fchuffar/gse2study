@@ -105,7 +105,11 @@ STAR \
   --outSAMtype BAM SortedByCoordinate
 samtools index {output.bam_file}
     """
-              
+
+#  --outSAMtype BAM Unsorted
+#samtools sort {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam -o {output.bam_file}
+      
+      
 rule count_classic:
     input:
       bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
