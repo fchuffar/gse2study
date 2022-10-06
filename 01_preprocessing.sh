@@ -74,6 +74,9 @@ do
   fi
 done
 
+cat checking_srrs_report.txt
+
+
 # SR or PE?
 ls -lha ~/projects/${datashare}/${gse}/raw
 sequencing_read_type=SR
