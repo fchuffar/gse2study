@@ -1,3 +1,4 @@
+
 import os 
 exec(open("config").read())
 
@@ -22,7 +23,7 @@ rule target:
       # bw_files     = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bw"),
       ycount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1],
       # ncount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt")[1],
-      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
+      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
 
     shell:"""
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
@@ -37,7 +38,7 @@ rule fastqc:
             html="{prefix}_fastqc.html"
     threads: 1
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 fastqc {input.fastqgz}
     """
 
@@ -53,7 +54,7 @@ rule trim_with_sickle_PE:
     threads: 1
     message:  "--- triming with sickle (Paired-End) ---"
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 sickle  pe -g\
   -t sanger \
   -f {input.fq_gz_f} \
@@ -71,7 +72,7 @@ rule index_genome:
     #priority: 0
     threads: 32
     shell:    """
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"    
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"    
 mkdir -p {output}
 STAR \
   --runThreadN {threads} \
@@ -93,7 +94,7 @@ rule align_trimed:
       bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam"
     threads: 32
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 cd {wildcards.prefix}
 STAR \
   --runThreadN {threads} \
@@ -105,11 +106,7 @@ STAR \
   --outSAMtype BAM SortedByCoordinate
 samtools index {output.bam_file}
     """
-
-#  --outSAMtype BAM Unsorted
-#samtools sort {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam -o {output.bam_file}
-      
-      
+              
 rule count_classic:
     input:
       bam_file="{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bam",
@@ -120,7 +117,7 @@ rule count_classic:
     priority: 50
     threads: 2
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
   {input.bam_file} \
   {input.gtf_file} \
@@ -136,7 +133,7 @@ rule count_rmdup_stranded:
     priority: 50
     threads: 1
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersection-strict --nonunique none \
   {input.bam_file} \
   {input.gtf_file} \
@@ -151,7 +148,7 @@ rule rmdup_bam:
     output: "{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.rmdup.bam"
     threads: 4
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 cd {wildcards.prefix}
 mkdir -p {wildcards.prefix}/tmp
 java -Djava.io.tmpdir={wildcards.prefix}/tmp -jar /summer/epistorage/miniconda3/share/picard-2.14-0/picard.jar \
@@ -172,7 +169,7 @@ rule bigwig_coverage:
     output: "{prefix}/{sample}_{trim}_star_{species}_{version}_Aligned.sortedByCoord.out.bw"
     threads: 4
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 bamCoverage \
   -b {input.bam_file} \
   --numberOfProcessors {threads} \
@@ -189,7 +186,7 @@ rule compile_blastdb:
     output: os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db")
     threads: 1
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"    
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"    
 makeblastdb -in {input} -dbtype nucl -parse_seqids -out {output}
 touch {output}
     """
@@ -201,7 +198,7 @@ rule blastn_ggaat:
     output: "{prefix}/{sample}_{subject}.blasted.txt.gz"
     threads: 1
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 gunzip -c {input.query_fqgz} | seqtk seq -A | 
 blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
@@ -214,7 +211,7 @@ rule blastn_unmapped_ggaat:
     output: "{prefix}/{sample}_{trim}_star_{species}_{version}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
-export PATH="/summer/epistorage/miniconda3/bin:$PATH"
+export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 cat {input.query_fqgz} | seqtk seq -A | 
 blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -evalue 10 -task blastn-short -word_size 8 -perc_identity 100 -qcov_hsp_perc 1  2>/dev/null | gzip  > {output}
     """
@@ -246,7 +243,7 @@ rule align_bowtie:
     threads: 32
     message:  "--- mapping with bowtie2 ---"
     shell:    """
-PATH="/summer/epistorage/miniconda3/bin:$PATH"
+PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 bowtie2 \
   -t \
   -p {threads} \
