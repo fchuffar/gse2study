@@ -57,7 +57,6 @@ conda activatesra_env
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
 do
-<<<<<<< HEAD
   FILE=${srr}.fastq
   if [ -f $FILE ]; then
      echo "File $FILE exists."
@@ -78,28 +77,6 @@ do
 done
 cat checking_srrs_report.txt
 gzip *.fastq
-=======
-  # FILE=${srr}_1.fastq.gz
-  # if [ -f $FILE ]; then
-  #    echo "File $FILE exists."
-  # else
-  #    echo "File $FILE does not exist."
-  #    prefetch $srr
-  #    vdb-validate $srr
-  #    status=$?
-  #    ## take some decision ##
-  #    [ $status -ne 0 ] && echo "$srr check failed" || echo "$srr ok" >> checking_srrs_report.txt
-  #    # parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-  #    # /summer/epistorage/fchuffar/miniconda3.save/envs/oct22_env/bin/parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-  #    # fastq-dump --gzip --split-files --outdir ./ --sra-id ${srr}
-  #    #
-  #    # fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-     fasterq-dump --threads 16 -p --temp /dev/shm --split-files --outdir ./ ${srr}
-  # fi
-done
-cat checking_srrs_report.txt
-gzip -c *.fastq
->>>>>>> d9cd8a58e9a6b82934f929903d3d5f5d91e3b17d
 
 
 # SR or PE?
