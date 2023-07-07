@@ -16,11 +16,9 @@ output:
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 genes = c("CCM2", "ROCK1", "ROCK2", "CD44", "S100A4", "JAM2", "ITGA6", "MMP2", "MMP9", "MMP10", "ESR1", "DDR2", "TWIST1", "GATA4", "ADAMTS4", "ADAMTS1")
 table_files = c(
-  "sic2r1vssiscru.complete.txt", 
-  "sic2r2vssiscru.complete.txt", 
-  "siccm2vssiscru.complete.txt", 
-  "siroc1vssiscru.complete.txt", 
-  "siroc2vssiscru.complete.txt"
+  # "drugaphibjvsctrldmsobj.complete.txt",
+  # "drugaphirpvsctrldmsorp.complete.txt"
+  "aphivsdmso.complete.txt"
 )
 ```
 
@@ -46,6 +44,13 @@ for(table_file in table_files) {
   legend("topleft", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
   text(casevcctrl[genes,]$log2FoldChange, -log10(casevcctrl[genes,]$padj), genes, cex=1, pos=3, col=2)
   knitr::kable(casevcctrl[genes,c("log2FoldChange", "pvalue")])
+
+  # plot(density(log2(casevcctrl$baseMean+1)))
+  # plot(log2(casevcctrl$ctrldmso_bj), log2(casevcctrl$drugaphi_bj))
+  # plot(density( casevcctrl$log2FoldChange))
+  # plot(log2(casevcctrl$ctrldmso_bj) - log2(casevcctrl$drugaphi_bj), casevcctrl$log2FoldChange)
+  
+
 }
 
 
@@ -57,7 +62,7 @@ for (g in genes) {
 ```
 
 
-```{r}
+```{r eval=FALSE}
 fcthresh = 1.2
 table_file = "siccm2vssiscru.complete.txt"
 de_ccm2 = read.table(paste0("tables/", table_file), header=TRUE)

@@ -21,14 +21,14 @@ rule target:
       # blastn_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_telocentro.unmapblasted.txt.gz"),
       bam_files    = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bam"),
       # bw_files     = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bw"),
-      ycount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1],
+      ycount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt"),
       # ncount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt")[1],
-      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
+      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
   ~/projects/"""+datashare+"""/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
-  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_*_fastqc.zip \
+  ~/projects/"""+datashare+"""/"""+gse+"""/raw/*_fastqc.zip \
 
 echo workflow \"align_heatshock\" completed at `date` 
           """
