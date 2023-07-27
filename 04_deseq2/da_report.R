@@ -45,8 +45,8 @@ pAdjustMethod <- "BH"                                # p-value adjustment method
 typeTrans <- "VST"                                   # transformation for PCA/clustering: "VST" or "rlog"
 locfunc <- "median"                                  # "median" (default) or "shorth" to estimate the size factors
 
-colors <- c("dodgerblue","firebrick1",               # vector of colors of each biological condition on the plots
-            "MediumVioletRed","SpringGreen")
+colors <- 1:8                                       # vector of colors of each biological condition on the plots
+            
 
 ################################################################################
 ###                             running script                               ###

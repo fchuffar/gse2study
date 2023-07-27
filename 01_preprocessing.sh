@@ -1,25 +1,10 @@
-cd ~/projects/dnadamage/results/GSE168689
+cd ~/projects/brain/results/rnaseq_lafage_icm
 source config
 echo $gse
 echo $project
 rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 ## data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
-
-
-# GSM5155749  BA.R1
-# GSM5155750  BA.R2
-# GSM5155751  BA.R3
-# GSM5155752  BD.R1
-# GSM5155753  BD.R2
-# GSM5155754  BD.R3
-# GSM5155755  RA.R1
-# GSM5155756  RA.R2
-# GSM5155757  RA.R3
-# GSM5155758  RD.R1
-# GSM5155759  RD.R2
-# GSM5155760  RD.R3
-
 
 
 ## download fastq files
@@ -107,7 +92,7 @@ cat *.info
 rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
 conda activate rnaseq_env
 cd ~/projects/${project}/results/${gse}/
-snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 16 -pn
+snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
 snakemake -s ~/projects/${project}/results/${gse}/wf.py --jobs 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 

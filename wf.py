@@ -23,7 +23,7 @@ rule target:
       # bw_files     = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_Aligned.sortedByCoord.out.bw"),
       ycount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt"),
       # ncount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt")[1],
-      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
+      rcount_files = get_files("~/projects/"+datashare+"/"+gse, "_notrim_fqgz.info", "~/projects/"+datashare+"/"+gse, "_notrim_star_"+species+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
 
     shell:"""
 multiqc --force -o ~/projects/"""+datashare+"""/"""+gse+"""/raw/ -n multiqc_notrim \
@@ -103,7 +103,9 @@ STAR \
   --readFilesCommand gunzip -c \
   --readFilesIn `cat {input.fastqc_info}` \
   --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_ \
-  --outSAMtype BAM SortedByCoordinate
+  --outSAMtype BAM Unsorted
+samtools sort {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam -o {output.bam_file}
+rm {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam
 samtools index {output.bam_file}
     """
               
