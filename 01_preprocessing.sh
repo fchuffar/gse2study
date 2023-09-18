@@ -102,3 +102,37 @@ rsync -auvP dahu:~/projects/${datashare}/${gse}/*.txt ~/projects/${datashare}/${
 rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/*.html ~/projects/${datashare}/${gse}/raw/
 rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/multiqc_notrim* ~/projects/${datashare}/${gse}/raw/
 open ~/projects/${datashare}/${gse}/raw/multiqc_notrim.html
+
+
+
+
+#Q1 : cond1 vs. cond2             => **genotype** HE vs. WT (ref.) | BF, notransf, novect, single_layer
+#Q2 : cond3 vs. cond4 vs. cond5   => **vector** novect vs. scrumb vs. vecph1 | BF, ASOtrans, WT, single_layer
+#           Q2.1 scrumb vs. novect (ref.) => control negatif
+#           Q2.2 vecph1 vs. scrumb (ref.) (ctrl ph1, Htt--)
+
+#Q3 : cond6 vs. cond7 vs. cond8   => **genotype** HE vs. HO vs. WT | EF, notransf, novect, spheroid
+#           Q3.1 HO vs. WT (ref.)
+#           Q3.2 HE vs. WT (ref.)
+#           Q3.3 HO vs. HE (ref.)
+
+# volcano plot par question
+# boxplot par gene
+# GSEA sur une question
+
+cd 04_deseq2_q1   ; echo "source('da_report.R');" | Rscript - ; cd ..
+cd 04_deseq2_q2.1 ; echo "source('da_report.R');" | Rscript - ; cd ..
+cd 04_deseq2_q2.2 ; echo "source('da_report.R');" | Rscript - ; cd ..
+cd 04_deseq2_q3.1 ; echo "source('da_report.R');" | Rscript - ; cd ..
+cd 04_deseq2_q3.2 ; echo "source('da_report.R');" | Rscript - ; cd ..
+cd 04_deseq2_q3.3 ; echo "source('da_report.R');" | Rscript - ; cd ..
+
+
+cd 04_deseq2_q1   ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+cd 04_deseq2_q2.1 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+cd 04_deseq2_q2.2 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+cd 04_deseq2_q3.1 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+cd 04_deseq2_q3.2 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+cd 04_deseq2_q3.3 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
+
+

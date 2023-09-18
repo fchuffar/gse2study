@@ -17,14 +17,21 @@ rsync -auvP --copy-links \
   /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/counts
 
 ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/*
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/counts/
 
 # MD5
 cd /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq
 md5sum *.fastq.gz > md5.geo.txt
+cat md5.geo.txt | cut -f1 -d" " | sort > /tmp/tmp.md5.geo.txt
+cat /home/fchuffar/projects/${datashare}/${gse}/raw/md5.bettik.txt  | cut -f1 -d" " | sort > /tmp/tmp.md5.bettik.txt
+diff /tmp/tmp.md5.geo.txt /tmp/tmp.md5.bettik.txt
 cd /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/counts
 md5sum *.txt > md5.geo.txt
-diff md5.geo.txt /home/fchuffar/projects/${datashare}/${gse}/raw/md5.bettik.txt 
 
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/*
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/fastq/
+ls -lha /bettik/chuffarf/geo_submission/${gse}/${GSE_TARGET_NAME}/counts/
 
 # Put metadata
 cd ~/projects/${project}/results/${gse}/geo_submission

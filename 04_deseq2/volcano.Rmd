@@ -13,18 +13,20 @@ output:
 
 
 ```{r, echo=FALSE, eval=TRUE}
-knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
-genes = c("CCM2", "ROCK1", "ROCK2", "CD44", "S100A4", "JAM2", "ITGA6", "MMP2", "MMP9", "MMP10", "ESR1", "DDR2", "TWIST1", "GATA4", "ADAMTS4", "ADAMTS1")
-table_files = c(
-  # "drugaphibjvsctrldmsobj.complete.txt",
-  # "drugaphirpvsctrldmsorp.complete.txt"
-  "aphivsdmso.complete.txt"
-)
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=12, fig.height=8, eval=TRUE, echo=FALSE, results="hide")
+genes = c("Htt")
+source("../config")
+table_files = list.files("tables/", ".complete.txt")
+prefix = substr(table_files, 1, nchar(table_files)-13)
+prefix
 ```
 
 
 ```{r results="verbatim"}
 # layout(matrix(1:10, 2, byrow=FALSE), respect=TRUE)
+layout(matrix(1,1), respect=TRUE)
+plot.new()
+legend("bottom", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
 layout(matrix(1:2,1), respect=TRUE)
 for(table_file in table_files) {
   main = table_file
@@ -36,12 +38,12 @@ for(table_file in table_files) {
   abline(h=-log10(0.05), col=2)
   abline(v=c(-1,1)*log2(1.5), col=2, lty=3)
   abline(v=c(-1,1)*log2(2), col=2, lty=2)
-  legend("topleft", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
+  # legend("bottomleft", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
   plot(casevcctrl$log2FoldChange, -log10(casevcctrl$padj), xlab="log2(foldchange)", ylab="-log10(padj) (BH)", main=main)
   abline(h=-log10(0.05), col=2)
   abline(v=c(-1,1)*log2(1.5), col=2, lty=3)
   abline(v=c(-1,1)*log2(2), col=2, lty=2)
-  legend("topleft", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
+  # legend("bottomleft", lty=1:3, col=2, legend=c("pval<0.05", "|fc|>2", "|fc|>1.5"))
   text(casevcctrl[genes,]$log2FoldChange, -log10(casevcctrl[genes,]$padj), genes, cex=1, pos=3, col=2)
   knitr::kable(casevcctrl[genes,c("log2FoldChange", "pvalue")])
 
@@ -54,328 +56,30 @@ for(table_file in table_files) {
 }
 
 
-# layout(1, respect=TRUE)
+layout(matrix(1:2,1), respect=TRUE)
 n = colnames(casevcctrl)[grep("norm",colnames(casevcctrl))]
 for (g in genes) {
-  boxplot(unlist(casevcctrl[g,n])~substr(n, 6, 11), main=g, las=2)
+  boxplot(unlist(casevcctrl[g,n])~substr(n, 26, 1000), main=g, las=2, xlab=""        , ylab="counts")
+  boxplot(log2(unlist(casevcctrl[g,n])+1)~substr(n, 26, 1000), main=g, las=2, xlab="", ylab="log2(counts+1)")
 }
 ```
-
-
-```{r eval=FALSE}
-fcthresh = 1.2
-table_file = "siccm2vssiscru.complete.txt"
-de_ccm2 = read.table(paste0("tables/", table_file), header=TRUE)
-rownames(de_ccm2) = de_ccm2$Id
-
-x = de_ccm2$log2FoldChange
-y = -log10(de_ccm2$padj)
-
-idx = !(is.na(x) | is.na(y)) & abs(x) > log2(fcthresh) & y > -log10(0.05) 
-idx_ccm2 = rownames(de_ccm2)[idx]
-idx = !(is.na(x) | is.na(y)) & x > log2(fcthresh) & y > -log10(0.05) 
-idx_ccm2_up = rownames(de_ccm2)[idx]
-idx = !(is.na(x) | is.na(y)) & x < -log2(fcthresh) & y > -log10(0.05) 
-idx_ccm2_dwn = rownames(de_ccm2)[idx]
-plot(de_ccm2$log2FoldChange, -log10(de_ccm2$padj), pch=".")
-points(de_ccm2[idx_ccm2_up,]$log2FoldChange, -log10(de_ccm2[idx_ccm2_up,]$padj), pch=".", col=2)
-points(de_ccm2[idx_ccm2_dwn,]$log2FoldChange, -log10(de_ccm2[idx_ccm2_dwn,]$padj), pch=".", col=4)
-
-
-table_file = "sic2r1vssiscru.complete.txt"
-de_c2r1 = read.table(paste0("tables/", table_file), header=TRUE)
-rownames(de_c2r1) = de_c2r1$Id
-
-x = de_c2r1$log2FoldChange
-y = -log10(de_c2r1$padj)
-
-idx = !(is.na(x) | is.na(y)) & abs(x) > log2(fcthresh) & y > -log10(0.05) 
-idx_c2r1 = rownames(de_c2r1)[idx]
-idx = !(is.na(x) | is.na(y)) & x > log2(fcthresh) & y > -log10(0.05) 
-idx_c2r1_up = rownames(de_c2r1)[idx]
-idx = !(is.na(x) | is.na(y)) & x < -log2(fcthresh) & y > -log10(0.05) 
-idx_c2r1_dwn = rownames(de_c2r1)[idx]
-plot(de_c2r1$log2FoldChange, -log10(de_c2r1$padj), pch=".")
-points(de_c2r1[idx_c2r1_up,]$log2FoldChange, -log10(de_c2r1[idx_c2r1_up,]$padj), pch=".", col=2)
-points(de_c2r1[idx_c2r1_dwn,]$log2FoldChange, -log10(de_c2r1[idx_c2r1_dwn,]$padj), pch=".", col=4)
-
-
-
-
-plot(de_ccm2$log2FoldChange, de_c2r1$log2FoldChange)
-abline(v=0, h=0, col=2)
-abline(v=c(-log2(1.2), log2(1.2)), h=c(-log2(1.2), log2(1.2)), col=2, lty=2)
-abline(v=c(-log2(1.5), log2(1.5)), h=c(-log2(1.5), log2(1.5)), col=2, lty=3)
-
-idx_oi1 = intersect(idx_ccm2_up, idx_c2r1_dwn)
-points(de_ccm2[idx, ]$log2FoldChange, de_c2r1[idx, ]$log2FoldChange, col=2)
-
-idx_oi2 = intersect(idx_ccm2_dwn, idx_c2r1_up)
-points(de_ccm2[idx, ]$log2FoldChange, de_c2r1[idx, ]$log2FoldChange, col=4)
-
-
-
-
-
-
-
-
-
-table_file = "siroc1vssiscru.complete.txt"
-de_roc1 = read.table(paste0("tables/", table_file), header=TRUE)
-rownames(de_roc1) = de_roc1$Id
-
-x = de_roc1$log2FoldChange
-y = -log10(de_roc1$padj)
-
-idx = !(is.na(x) | is.na(y)) & abs(x) > log2(fcthresh) & y > -log10(0.05) 
-idx_roc1 = rownames(de_roc1)[idx]
-idx = !(is.na(x) | is.na(y)) & x > log2(fcthresh) & y > -log10(0.05) 
-idx_roc1_up = rownames(de_roc1)[idx]
-idx = !(is.na(x) | is.na(y)) & x < -log2(fcthresh) & y > -log10(0.05) 
-idx_roc1_dwn = rownames(de_roc1)[idx]
-plot(de_roc1$log2FoldChange, -log10(de_roc1$padj), pch=".")
-points(de_roc1[idx_roc1_up,]$log2FoldChange, -log10(de_roc1[idx_roc1_up,]$padj), pch=".", col=2)
-points(de_roc1[idx_roc1_dwn,]$log2FoldChange, -log10(de_roc1[idx_roc1_dwn,]$padj), pch=".", col=4)
-
-
-idx = !(is.na(x) | is.na(y)) & abs(x) < log2(1.5) 
-idx = rownames(de_roc1)[idx]
-intersect(idx_oi1, idx)
-intersect(idx_oi2, idx)
-
-
-
-plot(de_roc1$log2FoldChange, de_c2r1$log2FoldChange)
-abline(v=0, h=0, col=2)
-abline(v=c(-log2(1.2), log2(1.2)), h=c(-log2(1.2), log2(1.2)), col=2, lty=2)
-abline(v=c(-log2(1.5), log2(1.5)), h=c(-log2(1.5), log2(1.5)), col=2, lty=3)
-
-points(de_roc1[idx_oi1, ]$log2FoldChange, de_c2r1[idx_oi1, ]$log2FoldChange, col=2)
-points(de_roc1[idx_oi2, ]$log2FoldChange, de_c2r1[idx_oi2, ]$log2FoldChange, col=4)
-
-
-
-
-
-
-
-
-```
-
-
-```{r eval=FALSE}
-# pvals = epimedtools::monitored_apply(casevcctrl[,n], 1, function(l) {
-#   # l = unlist(casevcctrl[g,n])
-#   m = lm(l~substr(n, 6, 11))
-#   pval = anova(m)[1,5]
-# })
-
-plot(density(-log10(pvals), na.rm=TRUE))
-
-p = na.omit(pvals)
-plot(density(-log10(p)))
-
-for (nb_genes in c(250, 500, 1000)) {
-  idx = names(sort(p))[1:nb_genes]
-
-  data = as.matrix(log2(casevcctrl[idx,n] + 1))
-  data = data - apply(data[,1:3], 1, mean)
-
-  Colv = NULL
-  dendrogram="none"      
-
-  # # clustering base on eucl. dist. for genes
-  # # hc_row = hclust(dist(data), method="complete")
-  # foo = microbenchmark::microbenchmark(
-  #   stats::cor(t(data), method="pe"),
-  #   WGCNA::cor(t(data), method="pe"),
-  #   times=10
-  # )
-  # plot(foo)
-  #
-  # cr = WGCNA::cor(t(data), method="pe")
-  # euc_dist <- function(m) {mtm <- Matrix::tcrossprod(m); sq <- rowSums(m*m);  sqrt(outer(sq,sq,"+") - 2*mtm)}
-  #
-  # foo = microbenchmark::microbenchmark(
-  #   dist(1 - cr),
-  #   euc_dist(1 - cr),
-  #   times=10
-  # )
-  # plot(foo)
-  #
-  #
-  # bar = 1 - WGCNA::cor(t(data))
-  # dst = dist(1 - WGCNA::cor(t(data), method="pe"))
-  #
-  #
-  # foo = microbenchmark::microbenchmark(
-  #   stats::hclust(dst, method="complete"),
-  #   fastcluster::hclust(dst, method="complete"),
-  #   times=10
-  # )
-  # plot(foo)
-  #
-  # foo = microbenchmark::microbenchmark(
-  #   stats::hclust(dist(1 - stats::cor(t(data), method="pe")), method="complete"),
-  #   fastcluster::hclust(dist(1 - WGCNA::cor(t(data), method="pe")), method="complete"),
-  #   times=3
-  # )
-  # plot(foo)
-  # hc_row = stats::hclust(dist(1 - stats::cor(t(data), method="pe")), method="complete")
-  hc_row = fastcluster::hclust(dist(1 - WGCNA::cor(t(data), method="pe")), method="complete")
-  Rowv = as.dendrogram(hc_row)
-  dendrogram="row"      
-
-  # col
-  colors=c("green", "black", "red")
-  cols = colorRampPalette(colors)(7)
-  breaks = quantile(data, 0:length(cols)/length(cols))
-
-  # quartz()
-  foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE, breaks=breaks)
-}
-
-# quartz()
-# colors=c("green", "green", "green", "black", "red", "red", "red")
-# cols = colorRampPalette(colors)(21)
-# foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE)
-
-
-# genes
-#   - ccm2 != scrum
-#   - c2r1 == scrum
-#   - ccm2 != c2r1
-
-
-  table_file = "siccm2vssiscru.complete.txt"
-  main= table_file
-  casevcctrl = read.table(paste0("tables/", table_file), header=TRUE)
-  casevcctrl = casevcctrl[order(casevcctrl$log2FoldChange),]
-  rownames(casevcctrl) = casevcctrl$Id
-
-  idx1 = rownames(casevcctrl)[!is.na(casevcctrl$padj) & !is.na(casevcctrl$log2FoldChange) & abs(casevcctrl$log2FoldChange) > log2(1.2) & casevcctrl$padj < 0.05]  
-  plot(casevcctrl$log2FoldChange, -log10(casevcctrl$padj), xlab="log2(foldchange)", ylab="-log10(padj) (BH)", main=main)
-  points(casevcctrl[idx1,]$log2FoldChange, -log10(casevcctrl[idx1,]$padj), pch=16, col=2)
-
-
-
-
-  table_file = "siccm2vssic2r1.complete.txt"
-  main= table_file
-  casevcctrl = read.table(paste0("tables/", table_file), header=TRUE)
-  casevcctrl = casevcctrl[order(casevcctrl$log2FoldChange),]
-  rownames(casevcctrl) = casevcctrl$Id
-
-  idx4 = rownames(casevcctrl)[!is.na(casevcctrl$padj) & !is.na(casevcctrl$log2FoldChange) & abs(casevcctrl$log2FoldChange) > log2(1.2) & casevcctrl$padj < 0.05]  
-  plot(casevcctrl$log2FoldChange, -log10(casevcctrl$padj), xlab="log2(foldchange)", ylab="-log10(padj) (BH)", main=main)
-  # points(casevcctrl[idx2,]$log2FoldChange, -log10(casevcctrl[idx2,]$padj), pch=16, col=2)
-  points(casevcctrl[idx4,]$log2FoldChange, -log10(casevcctrl[idx4,]$padj), pch=16, col=2)
-
-  idx7 = intersect(idx1, idx4)
-
-
-
-
-
-
-
-  table_file = "sic2r1vssiscru.complete.txt"
-  main= table_file
-  casevcctrl = read.table(paste0("tables/", table_file), header=TRUE)
-  casevcctrl = casevcctrl[order(casevcctrl$log2FoldChange),]
-  rownames(casevcctrl) = casevcctrl$Id
-
-  idx8 = idx7[abs(casevcctrl[idx7,]$log2FoldChange) < log2(1.2)]
-
-  plot(casevcctrl$log2FoldChange, -log10(casevcctrl$padj), xlab="log2(foldchange)", ylab="-log10(padj) (BH)", main=main)
-  points(casevcctrl[idx8,]$log2FoldChange, -log10(casevcctrl[idx8,]$padj), pch=16, col=2)
-
-
-
-
-
-
-
-
-  idx = idx8
-
-  data = as.matrix(log2(casevcctrl[idx,n] + 1))
-  data = data - apply(data[,1:3], 1, mean)
-
-  Colv = NULL
-  dendrogram="none"      
-
-  hc_row = fastcluster::hclust(dist(1 - WGCNA::cor(t(data), method="pe")), method="complete")
-  Rowv = as.dendrogram(hc_row)
-  dendrogram="row"      
-
-  # col
-  colors=c("green", "black", "red")
-  cols = colorRampPalette(colors)(7)
-  breaks = quantile(data, 0:length(cols)/length(cols))
-
-  # quartz()
-  foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE, breaks=breaks)
-
-
-  write.table(hc_row$labels[hc_row$order], "ranked_list.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
-
-
-
-  # for (g in idx) {
-  #   boxplot(unlist(casevcctrl[g,n])~substr(n, 6, 11), main=g, las=2)
-  # }
-
-
-
-sample_idx = n[c(1:6,10:12)]
-fact = c(rep("ctrl", 6), rep("case", 3))
-anova_res = epimedtools::monitored_apply(log2(casevcctrl[,sample_idx]+1), 1, function(l) {
-  # l = unlist(casevcctrl[g,sample_idx])
-  m = lm(l~fact)
-  anova(m)[1,5]
-  return(c(l2fc=m$coefficients[2], pval=anova(m)[1,5]))
-})
-
-foo = t(anova_res)
-foo = foo[!is.na(foo[,2]),]
-dim(foo)
-plot(foo[,1], -log10(foo[,2]), ylim=c(0,10))
-
-foo = foo[order(foo[,1]),]
-plot(foo[,1])
-
-write.table(rownames(foo), "ranked_list.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
-
-
-plot(density(-log10(foo[,2])))
-
-
-idx = names(foo[,2])[foo[,2] < 0.001]
-
-data = as.matrix(log2(casevcctrl[idx,n] + 1))
-data = data - apply(data[,1:3], 1, mean)
-
-Colv = NULL
-dendrogram="none"      
-
-hc_row = fastcluster::hclust(dist(1 - WGCNA::cor(t(data), method="pe")), method="complete")
-Rowv = as.dendrogram(hc_row)
-dendrogram="row"      
-
-# col
-colors=c("green", "black", "red")
-cols = colorRampPalette(colors)(7)
-breaks = quantile(data, 0:length(cols)/length(cols))
-
-# quartz()
-bar = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0("Expression (", nrow(data), " genes x ", ncol(data), " samples)"), mar=c(10,5), useRaster=TRUE, breaks=breaks)
-
-
-
-  
-
+```{r}
+gsea_input = cbind(rownames(casevcctrl[!is.na(casevcctrl$log2FoldChange),]), casevcctrl[!is.na(casevcctrl$log2FoldChange),]$log2FoldChange)
+homogdb = homologene::homologene(unique(unlist(gsea_input[,1])), inTax=homologene::taxData[gsub(" ", "_", homologene::taxData[,2])==species,1], outTax=9606)
+head(homogdb)
+dim(homogdb)  
+homogdb = homogdb[!duplicated(homogdb[,1]),]
+dim(homogdb)  
+rownames(homogdb) = homogdb[,1]
+dim(gsea_input)
+gsea_input = gsea_input[gsea_input[,1] %in% rownames(homogdb),]
+dim(gsea_input)
+gsea_input[,1] = homogdb[gsea_input[,1],2]
+head(gsea_input)
+dim(gsea_input)
+gsea_input_filename = paste0(prefix, "_gsea_input.rnk")
+print(paste("gsea_input were exported in", gsea_input_filename, "file."))
+write.table(gsea_input, gsea_input_filename, sep="\t", row.names=FALSE, col.names=FALSE, quote=FALSE)
 ```
 
 
