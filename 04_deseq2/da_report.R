@@ -19,12 +19,14 @@ author <- "Florent Chuffart"                                # author of the stat
 
 targetFile <- "design.txt"                           # path to the design/target file
 
-write.table(data.frame(
-  label = design$gsm,
-  files = paste0(design$gsm, "_notrim_star_", species, "_", version , "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"),
-  cond = design$cond, 
-  stringsAsFactors=FALSE
-), targetFile,sep=" ", quote=FALSE, row.names=FALSE)
+write.table(
+  cbind(data.frame(
+          label = design$gsm,
+          files = paste0(design$gsm, "_notrim_star_", species, "_", version , "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"),
+          stringsAsFactors=FALSE
+        ), design), 
+  targetFile,sep=" ", quote=FALSE, row.names=FALSE
+)
 
 
 rawDir <- paste0("~/projects/", datashare, "/", gse)                                      # path to the directory containing raw counts files
