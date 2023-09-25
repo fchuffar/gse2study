@@ -62,8 +62,13 @@ facts = substr(n, 26, 1000)
 facts = factor(facts, levels=unique((facts)))
 facts
 for (g in genes) {
+<<<<<<< HEAD
   boxplot(unlist(casevcctrl[g,n])~facts, main=g, las=2, xlab=""        , ylab="counts")
   boxplot(log2(unlist(casevcctrl[g,n])+1)~facts, main=g, las=2, xlab="", ylab="log2(counts+1)")
+=======
+  boxplot(unlist(casevcctrl[g,n])~substr(n, 26, 1000), main=g, las=2, xlab=""        , ylab="counts")
+  boxplot(log2(unlist(casevcctrl[g,n])+1)~substr(n, 26, 1000), main=g, las=2, xlab="", ylab="log2(counts+1)")
+>>>>>>> 9f12e4afc31de301ffe1d3781b62037202d8bc96
 }
 ```
 ```{r}

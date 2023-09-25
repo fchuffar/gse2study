@@ -141,5 +141,3 @@ cd 04_deseq2_q3.3 ; echo "rmarkdown::render('volcano.Rmd')" | Rscript - ; cd ..
 mkdir ~/projects/datashare/rnaseq_lafage_icm/
 rsync -auvP luke:~/projects/datashare/rnaseq_lafage_icm/*_notrim_star_Mus_musculus_mm10_geneswchrm_strandedreverse_classiccounts.txt ~/projects/datashare/rnaseq_lafage_icm/.
 
-
-
