@@ -13,7 +13,7 @@ output:
 
 
 ```{r, echo=FALSE, eval=TRUE}
-knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
+knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=9, eval=TRUE, echo=FALSE, results="hide")
 plot_expr_hm = function(data, 
   rsc=NULL                         , 
   csc=NULL                         , 
@@ -25,6 +25,7 @@ plot_expr_hm = function(data,
   normalization=FALSE              , 
   ordering_func=median             , 
   colors=c("cyan", "black", "red") , 
+  range_exp=NULL                   ,
   PCA=FALSE
 ) {
   # Remove rows with no variation (needed to clustering rows according to cor)
@@ -46,6 +47,11 @@ plot_expr_hm = function(data,
     data = apply(data, 2, function(c) {
       qqnorm(c, plot.it=FALSE)$x
     })
+  }
+  
+  if (! is.null(range_exp)) {
+    data[data<min(range_exp)] = min(range_exp)
+    data[data>max(range_exp)] = max(range_exp)    
   }
 
   # clustering samples...
@@ -88,6 +94,7 @@ plot_expr_hm = function(data,
     } else {
       # ... bases on correlation
       tmp_d = tmp_d[!apply(is.na(tmp_d), 1, any), ]
+      data = tmp_d 
       d = dist(1 - cor(t(tmp_d), method="pe"))
       hc_row = hclust(d, method="complete")
       Rowv = as.dendrogram(hc_row)      
@@ -95,8 +102,13 @@ plot_expr_hm = function(data,
   } else {
     hc_row = Rowv = NULL    
   }
+  
   RowSideColors = rep("white", nrow(data))
   names(RowSideColors) = rownames(data)
+  
+  if (!is.null(csc)) {
+    ColSideColors = csc
+  }
 
   
   if (PCA) {
@@ -137,7 +149,7 @@ plot_expr_hm = function(data,
 
     ColSideColors = palette(RColorBrewer::brewer.pal(n=8, "Dark2"))[k$cluster[colnames(data)]]    
     names(ColSideColors) = colnames(data)    
-
+    
     if (!is.null(csc)) {
       ColSideColors = csc
     }
@@ -214,6 +226,7 @@ plot_expr_hm = function(data,
   #   idx = intersect(rownames(data), names(rsc))
   #   RowSideColors[idx] = rsc[idx]
   # }
+  
 
 
   if (!is.null(Colv) & !is.null(Rowv)) {
@@ -229,15 +242,17 @@ plot_expr_hm = function(data,
   # colors = c("green", "black", "red")
   # colors = c("blue", "yellow", "red")
   # colors = rev(RColorBrewer::brewer.pal(n=11, "RdYlBu"))
-  cols = colorRampPalette(colors)(20)
-  foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, main=paste0(main, " (", nrow(data), " features x ", ncol(data), " tissues)"), mar=c(10,5), useRaster=TRUE, RowSideColors=RowSideColors, ColSideColors=ColSideColors, cex.axis=0.5)  
+  cols = colorRampPalette(colors)(30)
+  tracecol="green"
+  foo = gplots::heatmap.2(data, Rowv=Rowv, Colv=Colv, dendrogram=dendrogram, trace="none", col=cols, tracecol=tracecol, main=paste0(main, " (", nrow(data), " features x ", ncol(data), " tissues)"), mar=c(10,5), useRaster=TRUE, RowSideColors=RowSideColors, ColSideColors=ColSideColors, cex.axis=0.5)  
   return(list(rsc=RowSideColors, csc=ColSideColors, hc_row=hc_row, hc_col=hc_col))  
 }
 ```
 
 
 ```{r results="verbatim"}
-table_file = "CLvsGV.complete.txt"
+source("../config")
+table_file = "CvsP.complete.txt"
 data = read.table(paste0("tables/", table_file), header=TRUE, stringsAsFactor=FALSE)
 rownames(data) = data$Id
 # head(data)
@@ -245,19 +260,81 @@ data = log2(as.matrix(data[,substr(colnames(data), 1, 4) == "norm"])+1)
 colnames(data) = substr(colnames(data), 6, 1000)
 # head(data)
 
-idx_genes = intersect(readRDS("~/projects/pro_olfa_epiex/results/features_olfa.rds")$gene_symbol, rownames(data))
-plot_expr_hm(data[idx_genes,],
+regions_filenames = paste0("~/projects/datashare/genomes/", species, "/", annotation, "/", version, "/Annotation/Genes/genes.bed")
+genes = read.table(regions_filenames)
+head(genes)
+idx_genes = intersect(genes[genes[,1]%in%c("chrX", "chrY"),4], rownames(data))
+idx_samples = colnames(data)
+# idx_samples = c(
+#   "d20_wt_rep1",
+#   "d20_wt_rep2",
+#   "d20_wt_rep3",
+#   "d20_wt_rep4",
+#   "d20_ko_rep1",
+#   "d20_ko_rep2",
+#   "d20_ko_rep3",
+#   "d20_ko_rep4",
+#   "d22_wt_rep1",
+#   "d22_wt_rep2",
+#   "d22_wt_rep3",
+#   "d22_wt_rep4",
+#   "d22_ko_rep1",
+#   "d22_ko_rep2",
+#   "d22_ko_rep3",
+#   "d22_ko_rep4",
+#   "d24_wt_rep1",
+#   "d24_wt_rep2",
+#   "d24_ko_rep1",
+#   "d24_ko_rep2",
+#   "d26_wt_rep1",
+#   "d26_wt_rep2",
+#   "d26_ko_rep1",
+#   "d26_ko_rep2"
+# )
+
+csc = NULL
+# csc = c(
+#   "red",
+#   "red",
+#   "red",
+#   "red",
+#   "blue",
+#   "blue",
+#   "blue",
+#   "blue",
+#   "red",
+#   "red",
+#   "red",
+#   "red",
+#   "blue",
+#   "blue",
+#   "blue",
+#   "blue",
+#   "red",
+#   "red",
+#   "blue",
+#   "blue",
+#   "red",
+#   "red",
+#   "blue",
+#   "blue"
+# )
+
+
+
+foo = plot_expr_hm(data[idx_genes,idx_samples],
   rsc=NULL                         , 
-  csc=NULL                         , 
+  csc=csc                         , 
   nb_grp_row=4                     ,
   nb_grp_col=4                     , 
-  main=""                          , 
+  main="chrX/chrY genes expression", 
   hcmeth_cols=FALSE          , 
-  hcmeth_rows=FALSE                , 
-  # normalization="zscore_rows"              ,
-  normalization=FALSE              , 
+  hcmeth_rows="cor"                , 
+  normalization="zscore_rows"              ,
+  # normalization=FALSE                ,
   ordering_func=median             , 
   colors=c("cyan", "black", "red") , 
+  # range_exp=c(-3,3)                ,
   PCA=FALSE
   )
 
