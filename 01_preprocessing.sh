@@ -1,4 +1,4 @@
-cd ~/projects/brain/results/rnaseq_lafage_icm
+cd ~/projects/heatshock/results/SRP069329
 source config
 echo $gse
 echo $project
@@ -92,8 +92,8 @@ cat *.info
 rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
 conda activate rnaseq_env
 cd ~/projects/${project}/results/${gse}/
-snakemake -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
-snakemake -s ~/projects/${project}/results/${gse}/wf.py --jobs 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
+snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
+snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --jobs 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 
 ## get results

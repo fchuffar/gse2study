@@ -43,9 +43,10 @@ We plot characterization of reads `reverse` and reads `yes` with boxplot.
   
 ```{r}
 print("# stranded or not?")
-# foo_no = read.table(paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_", gtf_prefix, "_strandedno_classiccounts.txt"     ))[,2]
-foo_re = read.table(paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt"))[,2]
-foo_ye = read.table(paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    ))[,2]
+re_filenames = paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt")
+ye_filenames = paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    )
+foo_re = read.table(re_filenames)[,2]
+foo_ye = read.table(ye_filenames)[,2]
 layout(matrix(1:2, 1), respect=TRUE)
 plot(log2(foo_re+1), log2(foo_ye+1), pch=".")
 abline(0,1, col=2)
