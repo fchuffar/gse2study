@@ -1,4 +1,4 @@
-cd ~/projects/heatshock/results/SRP069329
+cd ~/projects/breast/results/rnaseq_dnmt_bgi
 source config
 echo $gse
 echo $project
@@ -7,16 +7,21 @@ rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/re
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 
 
-## download fastq files
+
+
+
+
+
+## download fastq files from GEO/SRA
 # wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
-sra=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
+sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
 echo $sra
-srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
+srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
 echo $srrs
 echo $srrs | wc
 
-mkdir -p ~/projects/${datashare}/${gse}/raw
-cd ~/projects/${datashare}/${gse}/raw
+mkdir -p ~/projects/datashare/${gse}/raw
+cd ~/projects/datashare/${gse}/raw
 
 # echo "checking" $srrs >> checking_srrs_report.txt
 # for srr in $srrs
@@ -35,8 +40,6 @@ cd ~/projects/${datashare}/${gse}/raw
 #   fi
 # done
 # cat checking_srrs_report.txt
-
-
 
 conda activatesra_env
 echo "checking" $srrs >> checking_srrs_report.txt
@@ -65,18 +68,18 @@ gzip *.fastq
 
 
 # SR or PE?
-ls -lha ~/projects/${datashare}/${gse}/raw
-sequencing_read_type=SR
+ls -lha ~/projects/datashare/${gse}/raw
+sequencing_read_type=PE
 
 ## metadata linking sample and raw files
-gsms=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
 echo $gsms
 echo $gsms | wc
-cd ~/projects/${datashare}/${gse}/
+cd ~/projects/datashare/${gse}/
 for gsm in $gsms
 do
   echo ${gsm}  
-  srrs=`cat ~/projects/${datashare}/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
   echo ${srrs}    
   # # PE
   # # echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
@@ -90,18 +93,19 @@ cat *.info
 ## qc align count
 # put wf on dahu and launch
 rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/results/${gse}/
+source ~/conda_config.sh
 conda activate rnaseq_env
 cd ~/projects/${project}/results/${gse}/
 snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
-snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --jobs 49 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
+snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 
 ## get results
-mkdir -p ~/projects/${datashare}/${gse}/raw/
-rsync -auvP dahu:~/projects/${datashare}/${gse}/*.txt ~/projects/${datashare}/${gse}/
-rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/*.html ~/projects/${datashare}/${gse}/raw/
-rsync -auvP dahu:~/projects/${datashare}/${gse}/raw/multiqc_notrim* ~/projects/${datashare}/${gse}/raw/
-open ~/projects/${datashare}/${gse}/raw/multiqc_notrim.html
+mkdir -p ~/projects/datashare/${gse}/raw/
+rsync -auvP dahu:~/projects/datashare/${gse}/*.txt ~/projects/datashare/${gse}/
+rsync -auvP dahu:~/projects/datashare/${gse}/raw/*.html ~/projects/datashare/${gse}/raw/
+rsync -auvP dahu:~/projects/datashare/${gse}/raw/multiqc_notrim* ~/projects/datashare/${gse}/raw/
+open ~/projects/datashare/${gse}/raw/multiqc_notrim.html
 
 
 

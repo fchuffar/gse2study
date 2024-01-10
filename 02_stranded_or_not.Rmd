@@ -43,8 +43,8 @@ We plot characterization of reads `reverse` and reads `yes` with boxplot.
   
 ```{r}
 print("# stranded or not?")
-re_filenames = paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt")
-ye_filenames = paste0("~/projects/", datashare, "/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    )
+re_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt")
+ye_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    )
 foo_re = read.table(re_filenames)[,2]
 foo_ye = read.table(ye_filenames)[,2]
 layout(matrix(1:2, 1), respect=TRUE)
@@ -57,7 +57,7 @@ boxplot(cnt~str, df)
 ```{r}
 diff = median(log2(foo_re+1)) - median(log2(foo_ye+1))
 
-if (diff > 2) {
+if (diff > 1.5) {
   strand = "reverse" 
 } else if (diff < -2) {
   strand = "yes" 
