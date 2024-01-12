@@ -88,7 +88,7 @@ It also includes following matrix of counts:
   
 ```{r}
 print("# build raw counts")
-count_files = list.files(paste0("~/projects/", datashare, "/", gse), paste0("notrim_star_", species, "_", version, "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"), full.names=TRUE)  
+count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"), full.names=TRUE)  
 if (!file.exists("raw_counts.rds")) {
   raw_counts = sapply(unlist(count_files), function(cnt_filename){
     foo = read.table(cnt_filename)
@@ -120,7 +120,7 @@ colnames(raw_counts)
 dim(raw_counts)
 
 print("# build exp_grp from multiqc")
-exp_grp_mqc = read.table(paste0("~/projects/", datashare, "/", gse, "/raw/multiqc_notrim_data/multiqc_star.txt"), sep="\t", header=TRUE, stringsAsFactors=FALSE)
+exp_grp_mqc = read.table(paste0("~/projects/datashare/", gse, "/raw/multiqc_notrim_data/multiqc_star.txt"), sep="\t", header=TRUE, stringsAsFactors=FALSE)
 rownames(exp_grp_mqc) = do.call(rbind, strsplit(exp_grp_mqc$Sample, "_notrim", fixed=TRUE))[,1]
 sum(!rownames(exp_grp_mqc) %in% colnames(raw_counts))
 exp_grp_mqc = exp_grp_mqc[colnames(raw_counts),]

@@ -41,6 +41,7 @@ cd ~/projects/datashare/${gse}/raw
 # done
 # cat checking_srrs_report.txt
 
+source ~/conda_config.sh
 conda activatesra_env
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
