@@ -1,16 +1,19 @@
-cd ~/projects/t2t/results/GSE149609
+cd ~/projects/epispores/results/rnaseq_govin_2023spo4tU
 source config
 echo $gse
 echo $project
 rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
-## data description
+
+
+
+
+
+
+
+
+# from NCBI/GEO... 
+# data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
-
-
-
-
-
-
 
 ## download fastq files from GEO/SRA
 # wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
@@ -66,7 +69,6 @@ do
 done
 cat checking_srrs_report.txt
 gzip *.fastq
-
 
 # SR or PE?
 ls -lha ~/projects/datashare/${gse}/raw
