@@ -102,6 +102,9 @@ cd ~/projects/${project}/results/${gse}/
 snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
 snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
+# Stranded or not?
+RCODE="rmarkdown::render('02_stranded_or_not.Rmd')"
+(echo $RCODE | Rscript - 2>&1) > 02_stranded_or_not.Rout
 
 ## get results
 mkdir -p ~/projects/datashare/${gse}/raw/
