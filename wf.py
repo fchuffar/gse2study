@@ -26,9 +26,9 @@ rule target:
       rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""
-multiqc --force -o ~/projects/""datashare""/"""+gse+"""/raw/ -n multiqc_notrim \
-  ~/projects/""datashare""/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
-  ~/projects/""datashare""/"""+gse+"""/raw/*_fastqc.zip \
+multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \
+  ~/projects/datashare/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
+  ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
 
 echo workflow \"align_heatshock\" completed at `date` 
           """
