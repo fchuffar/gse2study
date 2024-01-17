@@ -1,4 +1,4 @@
-cd ~/projects/breast/results/rnaseq_dnmt_bgi
+cd ~/projects/t2t/results/GSE149609
 source config
 echo $gse
 echo $project
@@ -42,12 +42,12 @@ cd ~/projects/datashare/${gse}/raw
 # cat checking_srrs_report.txt
 
 source ~/conda_config.sh
-conda activatesra_env
+conda activate sra_env
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
 do
-  FILE=${srr}.fastq
-  if [ -f $FILE ]; then
+  FILE=${srr}_1.fastq
+  if [[ -f $FILE || -f $FILE.gz ]]; then
      echo "File $FILE exists."
   else
      echo "File $FILE does not exist."
@@ -82,10 +82,10 @@ do
   echo ${gsm}  
   srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
   echo ${srrs}    
-  # # PE
-  # # echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
+  # PE
+  echo raw/`echo $srrs | sed 's/ /_R1\.fastq\.gz,raw\//g'`_R1.fastq.gz raw/`echo $srrs | sed 's/ /_R2\.fastq\.gz,raw\//g'`_R2.fastq.gz > ${gsm}_notrim_fqgz.info
   # # SR
-  echo raw/`echo $srrs | sed 's/ /\.fastq\.gz,raw\//g'`.fastq.gz > ${gsm}_notrim_fqgz.info
+  # echo raw/`echo $srrs | sed 's/ /\.fastq\.gz,raw\//g'`.fastq.gz > ${gsm}_notrim_fqgz.info
 done
 cat *.info
 
