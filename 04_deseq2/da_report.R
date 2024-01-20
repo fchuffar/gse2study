@@ -10,7 +10,7 @@
 ################################################################################
 rm(list=ls())                                        # remove all the objects from the R session
 source("../config")
-source("../config.R")
+source("../design.R")
 
 workDir <- "."      # working directory for the R session
 
