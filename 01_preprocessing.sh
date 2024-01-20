@@ -1,4 +1,4 @@
-cd ~/projects/epispores/results/rnaseq_govin_2023spo4tU
+cd ~/projects/epispores/results/GSE89530
 source config
 echo $gse
 echo $project
@@ -11,49 +11,37 @@ rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/re
 
 
 
-# from NCBI/GEO... 
+# download fastq files NCBI/GEO... 
 # data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
-
-## download fastq files from GEO/SRA
+# ## download NCBI/SRA db
 # wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
-sra=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep ${gse} | cut -f1 | grep SRA`
+# ## preprocessing it...
+# cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep RUN > ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab
+# cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep GSE > ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab
+sra=`cat ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab | grep ${gse} | cut -f1 | grep SRA`
 echo $sra
-srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra}| cut -f1 | grep SRR`
+if [[ -f ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab ]]; then
+   echo "File ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab exists."
+else
+  cat ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab | grep ${sra} > ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab
+fi
+srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${sra} | cut -f1 | grep SRR`
 echo $srrs
 echo $srrs | wc
 
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
 
-# echo "checking" $srrs >> checking_srrs_report.txt
-# for srr in $srrs
-# do
-#   FILE=${srr}_1.fastq.gz
-#   if [ -f $FILE ]; then
-#      echo "File $FILE exists."
-#   else
-#      echo "File $FILE does not exist."
-#      prefetch $srr
-#      vdb-validate $srr
-#      status=$?
-#      ## take some decision ##
-#      [ $status -ne 0 ] && echo "$srr check failed" || echo "$srr ok" >> checking_srrs_report.txt
-#      parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-#   fi
-# done
-# cat checking_srrs_report.txt
-
 source ~/conda_config.sh
 conda activate sra_env
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
 do
-  FILE=${srr}_1.fastq
-  if [[ -f $FILE || -f $FILE.gz ]]; then
-     echo "File $FILE exists."
+  if [[ -f ${srr}.fastq || -f ${srr}.fastq.gz || -f ${srr}_1.fastq || -f ${srr}_1.fastq.gz ]]; then
+     echo "File ${srr}.fastq exists."
   else
-     echo "File $FILE does not exist."
+     echo "File ${srr}.fastq does not exist."
      # prefetch $srr
      # vdb-validate $srr
      # status=$?
@@ -72,24 +60,37 @@ gzip *.fastq
 
 # SR or PE?
 ls -lha ~/projects/datashare/${gse}/raw
-sequencing_read_type=PE
+if [[ -f ${srr}_1.fastq || -f ${srr}_1.fastq.gz ]]; then
+  sequencing_read_type=PE
+else
+  sequencing_read_type=SR
+fi
+echo $sequencing_read_type
 
 ## metadata linking sample and raw files
-gsms=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
 echo $gsms
 echo $gsms | wc
 cd ~/projects/datashare/${gse}/
 for gsm in $gsms
 do
   echo ${gsm}  
-  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
   echo ${srrs}    
-  # PE
-  echo raw/`echo $srrs | sed 's/ /_R1\.fastq\.gz,raw\//g'`_R1.fastq.gz raw/`echo $srrs | sed 's/ /_R2\.fastq\.gz,raw\//g'`_R2.fastq.gz > ${gsm}_notrim_fqgz.info
-  # # SR
-  # echo raw/`echo $srrs | sed 's/ /\.fastq\.gz,raw\//g'`.fastq.gz > ${gsm}_notrim_fqgz.info
+  if [[ $sequencing_read_type == PE ]]; then
+    # PE
+    echo PE    
+    echo raw/`echo $srrs | sed 's/ /_1\.fastq\.gz,raw\//g'`_1.fastq.gz raw/`echo $srrs | sed 's/ /_2\.fastq\.gz,raw\//g'`_2.fastq.gz > ${gsm}_notrim_fqgz.info
+  else
+    # # SR
+    echo SR
+    echo raw/`echo $srrs | sed 's/ /\.fastq\.gz,raw\//g'`.fastq.gz > ${gsm}_notrim_fqgz.info
+  fi
 done
 cat *.info
+
+
+
 
 
 
@@ -99,7 +100,7 @@ rsync -auvP ~/projects/${project}/results/${gse}/ dahu:~/projects/${project}/res
 source ~/conda_config.sh
 conda activate rnaseq_env
 cd ~/projects/${project}/results/${gse}/
-snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --cores 32 -pn
+snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --cores 24 -pn
 snakemake -k -s ~/projects/${project}/results/${gse}/wf.py --jobs 50 --cluster "oarsub --project epimed -l nodes=1/core={threads},walltime=6:00:00 "  --latency-wait 60 -pn
 
 # Stranded or not?

@@ -20,10 +20,11 @@ rule target:
       # fqc_files    = get_files("~/projects/datashare/"+gse+"/raw", ".fq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
       # blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_telocentro.unmapblasted.txt.gz"),
       bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out.bam"),
-      bw_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out.bw"),
+      bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
+      bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
       ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
       # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
-      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
+      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \
@@ -166,18 +167,17 @@ samtools index {output}
 
 
 rule bigwig_coverage:
-    input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bw"
+    input:  "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out_{norm}_{mmq}_{binsize}.bw"
     threads: 4
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 bamCoverage \
-  -b {input.bam_file} \
+  -b {input} \
   --numberOfProcessors {threads} \
-  --binSize 10 \
-  --minMappingQuality 30 \
-  --normalizeUsing RPKM \
+  --binSize {wildcards.binsize} \
+  --minMappingQuality {wildcards.mmq} \
+  --normalizeUsing {wildcards.norm} \
   -o {output}
     """
     
