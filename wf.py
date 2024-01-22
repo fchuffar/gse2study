@@ -30,6 +30,8 @@ rule target:
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \
   ~/projects/datashare/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
   ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
+  ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
+  
 
 echo workflow \"align_heatshock\" completed at `date` 
           """
@@ -41,6 +43,7 @@ rule fastqc:
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 fastqc {input.fastqgz}
+fastq_screen --aligner bowtie2 --threads {threads} {input.fastqgz}
     """
 
 
