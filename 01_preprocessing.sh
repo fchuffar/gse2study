@@ -1,4 +1,4 @@
-cd ~/projects/epispores/results/GSE89530
+cd ~/projects/cometh/results/lot1
 source config
 echo $gse
 echo $project
@@ -90,6 +90,11 @@ done
 cat *.info
 
 
+
+# If not fromn NCCBI/GEO, organize your raw files in datashare
+mkdir -p ~/projects/datashare/${gse}/raw
+cd ~/projects/datashare/${gse}/raw
+# ... edit notes.txt
 
 
 
