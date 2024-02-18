@@ -1,8 +1,8 @@
-cd ~/projects/cometh/results/lot1
+cd ~/projects/study_rnaseqgeo/results/GSE171888
 source config
 echo $gse
 echo $project
-rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
+rsync -auvP ~/projects/${project}/ cargo:~/projects/${project}/
 
 
 
@@ -60,7 +60,7 @@ gzip *.fastq
 
 # SR or PE?
 ls -lha ~/projects/datashare/${gse}/raw
-if [[ -f ${srr}_1.fastq || -f ${srr}_1.fastq.gz ]]; then
+if [[ -f ${srr}_2.fastq || -f ${srr}_2.fastq.gz ]]; then
   sequencing_read_type=PE
 else
   sequencing_read_type=SR
