@@ -1,8 +1,8 @@
-cd ~/projects/study_rnaseqgeo/results/GSE171888
+cd ~/projects/misympatihc/results/misympatihc_rnaseq_mgx
 source config
 echo $gse
 echo $project
-rsync -auvP ~/projects/${project}/ cargo:~/projects/${project}/
+rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/results/${gse}/
 
 
 
