@@ -1,4 +1,4 @@
-cd ~/projects/misympatihc/results/misympatihc_rnaseq_mgx
+cd ~/projects/all_tchin/results/rnaseq_shanshan_novogene
 source config
 echo $gse
 echo $project
@@ -91,10 +91,10 @@ cat *.info
 
 
 
-# If not fromn NCCBI/GEO, organize your raw files in datashare
+# If not from NCCBI/GEO, organize your raw files in datashare
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
-# ... edit notes.txt
+# ... edit and bash design.sh
 
 
 
