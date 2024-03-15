@@ -36,14 +36,14 @@ multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_no
 echo workflow \"align_heatshock\" completed at `date` 
           """
 rule fastqc:
-    input:  fastqgz="{prefix}.fastq.gz"
-    output: zip="{prefix}_fastqc.zip",
-            html="{prefix}_fastqc.html"
+    input:  fastqgz="{path}/raw/{prefix}.fastq.gz"
+    output: zip="{path}/raw/{prefix}_fastqc.zip",
+            html="{path}/raw/{prefix}_fastqc.html"
     threads: 1
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
 fastqc {input.fastqgz}
-fastq_screen --aligner bowtie2 --threads {threads} {input.fastqgz}
+fastq_screen --aligner bowtie2 --outdir {wildcards.path}/raw/ --threads {threads} {input.fastqgz}
     """
 
 
