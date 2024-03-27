@@ -57,7 +57,5 @@ tar -cvf ${GSE_TARGET_NAME}.tar ${GSE_TARGET_NAME}
 # Put on GEO
 ssh cargo
 cd /bettik/chuffarf/geo_submission/${gse}/
-lftp ftp-private.ncbi.nlm.nih.gov
-# identification requiered...
-put ${GSE_TARGET_NAME}.tar
+lftp -e "mirror -R archive4geo uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX " -u geoftp,XXXpasswrdXXX ftp-private.ncbi.nlm.nih.gov
 
