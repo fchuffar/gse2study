@@ -1,6 +1,5 @@
 gse="rnaseq_lafage_icm"
 project="brain"
-gsm="XX"
 species="Mus_musculus"
 version="mm10"
 annotation="UCSC"
