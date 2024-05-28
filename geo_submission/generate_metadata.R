@@ -1,7 +1,7 @@
 source("../config")
-source("../config.R")
+source("../design.R")
 
-samples = read.table(paste0("/bettik/chuffarf/geo_submission/", gse, "/counts/md5.geo.txt"))
+samples = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/counts/md5.geo.txt"))
 head(samples)
 dim(samples)
 

@@ -1,5 +1,5 @@
-project="all_tchin"
-gse="rnaseq_shanshan_novogene"
+project="cometh"
+gse="rnaseq_cometh_lot1"
 species="Homo_sapiens"
 annotation="UCSC"
 version="hg38"

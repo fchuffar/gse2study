@@ -1,4 +1,4 @@
-cd ~/projects/all_tchin/results/rnaseq_shanshan_novogene
+cd ~/projects/cometh/results/rnaseq_cometh_lot1
 source config
 echo $gse
 echo $project
