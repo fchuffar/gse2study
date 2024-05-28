@@ -48,7 +48,7 @@ WriteXLS::WriteXLS(samples, "01_samples.xlsx")
 
 
 
-proc_data_files = read.table(paste0("/bettik/chuffarf/geo_submission/", gse, "/counts/md5.geo.txt"))
+proc_data_files = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/counts/md5.geo.txt"))
 head(proc_data_files)
 dim(proc_data_files)
 
@@ -67,7 +67,7 @@ WriteXLS::WriteXLS(proc_data_files, "02_proc_data_files.xlsx")
 
 
 
-raw_files = read.table(paste0("/bettik/chuffarf/geo_submission/", gse, "/fastq/md5.geo.txt"))
+raw_files = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/fastq/md5.geo.txt"))
 head(raw_files)
 dim(raw_files)
 
