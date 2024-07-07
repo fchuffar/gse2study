@@ -252,7 +252,11 @@ plot_expr_hm = function(data,
 
 ```{r results="verbatim"}
 source("../config")
-table_file = "CvsP.complete.txt"
+genes = c("ASCL1", "NEUROD1", "POU2F3", "RNF113A", "SMYD3", "YAP1")
+table_file = list.files("tables/", ".complete.txt")[1]
+prefix = substr(table_files, 1, nchar(table_files)-13)
+prefix
+
 data = read.table(paste0("tables/", table_file), header=TRUE, stringsAsFactor=FALSE)
 rownames(data) = data$Id
 # head(data)
@@ -264,6 +268,8 @@ regions_filenames = paste0("~/projects/datashare/genomes/", species, "/", annota
 genes = read.table(regions_filenames)
 head(genes)
 idx_genes = intersect(genes[genes[,1]%in%c("chrX", "chrY"),4], rownames(data))
+idx_genes = c("ASCL1", "NEUROD1", "POU2F3", "RNF113A", "SMYD3", "YAP1")
+
 idx_samples = colnames(data)
 # idx_samples = c(
 #   "d20_wt_rep1",
