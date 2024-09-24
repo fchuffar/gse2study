@@ -49,15 +49,17 @@ open seq_template.xlsx
 
 rsync -auvP seq_template.xlsx cargo:/bettik/chuffarf/geo_submission/${project}/${gse}/.
 
-# Creating archive
-cd /bettik/chuffarf/geo_submission/${gse}/
-ls -lha ${GSE_TARGET_NAME}/*
- 
-tar -cvf ${GSE_TARGET_NAME}.tar ${GSE_TARGET_NAME}
-
-
 # Put on GEO
+# https://www.ncbi.nlm.nih.gov/geo/info/seq.html
+# https://www.ncbi.nlm.nih.gov/geo/info/submissionftp.html
+# Login Era Account > Sign in – Research Organizations > UGA > submit dataset > Submit high-throughput sequencing (HTS)
+# https://www.ncbi.nlm.nih.gov/geo/info/submissionftp.html
+# get that:
+#     personalized upload space uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX
+#     host address	ftp-private.ncbi.nlm.nih.gov
+#     username	geoftp
+#     password	XXXpasswrdXXX
 ssh cargo
-cd /bettik/chuffarf/geo_submission/${gse}/
-lftp -e "mirror -R archive4geo uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX " -u geoftp,XXXpasswrdXXX ftp-private.ncbi.nlm.nih.gov
-
+cd /bettik/chuffarf/geo_submission/${project}/
+lftp -e "mirror -R ${gse} uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX " -u geoftp,XXXpasswrdXXX ftp-private.ncbi.nlm.nih.gov
+# Upload metadata file in https://submit.ncbi.nlm.nih.gov/geo/submission/meta/
