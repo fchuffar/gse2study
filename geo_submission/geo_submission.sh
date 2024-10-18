@@ -65,7 +65,7 @@ host_address="ftp-private.ncbi.nlm.nih.gov"
 username="geoftp"
 password="XXXpasswrdXXX"
 cd /bettik/chuffarf/geo_submission/${project}/
-lftp -e "mirror -R ${gse} ${personalized_upload_space} " -u ${username},${password} ${host_address}
+lftp -e "mirror -R ${gse} ${personalized_upload_space}/${gse} " -u ${username},${password} ${host_address}
 # then Upload metadata file in https://submit.ncbi.nlm.nih.gov/geo/submission/meta/
 
 
