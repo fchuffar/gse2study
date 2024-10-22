@@ -1,0 +1,7 @@
+project="meth3d"
+gse="GSE90240"
+species="Homo_sapiens"
+annotation="UCSC"
+version="hg19"
+gtf_prefix="geneswchrm" 
+strand="no"

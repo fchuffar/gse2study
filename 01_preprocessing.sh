@@ -1,4 +1,4 @@
-cd ~/projects/cometh/results/rnaseq_cometh_lot1
+cd ~/projects/meth3d/results/GSE45332
 source config
 echo $gse
 echo $project
@@ -52,7 +52,7 @@ do
      # # fastq-dump --gzip --split-files --outdir ./ --sra-id ${srr}
      # #
      # # fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-     fasterq-dump --threads 16 -p --temp /dev/shm --split-files --outdir ./ ${srr}
+     fasterq-dump --threads 16 -p --temp . --split-files --outdir ./ ${srr}
   fi
 done
 cat checking_srrs_report.txt
