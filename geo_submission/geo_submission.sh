@@ -19,18 +19,27 @@ dict_cell_type = c(
   S="Spermatozoa"
 )
 
+dict_tissue = c(
+  L="liver",
+  T="testis"
+)
 
+dict_treatment = c(
+  H="High dose",
+  C="Control",
+  L="Low dose"
+)
 
-samples$sample_name            = substr(samples[,2], 1, 14)
+samples$sample_name            = substr(samples[,2], 1, 6)
 rownames(samples) = samples$sample_name
 samples$title                  = samples$sample_name
 samples$library_strategy       = "RNA-Seq"
-samples$organism               = "Mus musculus"
-samples$tissue                 = "testis"
+samples$organism               = c("Homo sapiens", "Mus musculus", "Rattus norvegicus")[3]
+samples$tissue                 = c("liver", "testis")[1]
 samples$cell_line              = ""
-samples$cell_type              = dict_cell_type[substr(rownames(samples), 1, 1)]
-samples$genotype               = dict_genotype  [substr(rownames(samples), 3, 9)]
-samples$treatment              = ""
+samples$cell_type              = ""
+samples$genotype               = ""
+samples$treatment              = dict_treatment[substr(samples[,2], 3, 3)]
 samples$batch                  = ""
 samples$molecule               = c("polyA RNA", "total RNA", "genomic DNA")[1]
 samples$genotype               = c("single", "paired-end")[1]
