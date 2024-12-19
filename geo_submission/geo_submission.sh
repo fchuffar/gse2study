@@ -1,72 +1,113 @@
-# source ../01_preprocessing.sh first lines...
-ssh cargo
+source("../config")
+source("../design.R")
 
-# Transfering files
-cd ~/projects/datashare/${gse}/
-ls -lha raw/*1.fastq.gz raw/*2.fastq.gz
-cat raw/md5.bettik.txt 
-ls -lha *_${gtf_prefix}_stranded${strand}_classiccounts.txt
-mkdir -p /bettik/chuffarf/geo_submission/${project}/${gse}/fastq
-mkdir -p /bettik/chuffarf/geo_submission/${project}/${gse}/counts
-rsync -auvP --copy-links \
-  ~/projects/datashare/${gse}/raw/*1.fastq.gz \
-  ~/projects/datashare/${gse}/raw/*2.fastq.gz \
-  /bettik/chuffarf/geo_submission/${project}/${gse}/fastq/.
-rsync -auvP --copy-links \
-  ~/projects/datashare/${gse}/*_${gtf_prefix}_stranded${strand}_classiccounts.txt \
-  /bettik/chuffarf/geo_submission/${project}/${gse}/counts
-
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/*
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/fastq/
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/counts/
-
-# MD5
-cd /bettik/chuffarf/geo_submission/${project}/${gse}/fastq
-md5sum *.fastq.gz > md5.geo.txt
-cat md5.geo.txt | cut -f1 -d" " | sort > /tmp/tmp.md5.geo.txt
-cat ~/projects/datashare/${gse}/raw/md5.bettik.txt  | cut -f1 -d" " | sort > /tmp/tmp.md5.bettik.txt
-diff /tmp/tmp.md5.geo.txt /tmp/tmp.md5.bettik.txt
-cd /bettik/chuffarf/geo_submission/${project}/${gse}/counts
-md5sum *.txt > md5.geo.txt
-
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/*
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/fastq/
-ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/counts/
-
-# Put metadata
-source ~/conda_config.sh 
-conda activate rnaseq_env
-cd ~/projects/${project}/results/${gse}/geo_submission
-Rscript generate_metadata.R 
-
-rsync -auvP cargo:~/projects/${project}/results/${gse}/geo_submission/0*_*.xlsx ~/projects/${project}/results/${gse}/geo_submission/.
+samples = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/counts/md5.geo.txt"))
+head(samples)
+dim(samples)
 
 
-# localy 
-cd ~/projects/${project}/results/${gse}/geo_submission
-# wget https://www.ncbi.nlm.nih.gov/geo/info/examples/seq_template.xlsx
-open seq_template.xlsx
+dict_genotype = c(
+  h2al2WT="H2al2 WT", 
+  h2al2KO="H2al2 KO" 
+)
 
-rsync -auvP seq_template.xlsx cargo:/bettik/chuffarf/geo_submission/${project}/${gse}/.
 
-# Put on GEO
-# Login in # https://www.ncbi.nlm.nih.gov/geo/info/seq.html
-# Login Era Account > Sign in – Research Organizations > UGA > submit dataset > Submit high-throughput sequencing (HTS)
-# Login Era Account > Sign in – Research Organizations > UGA > submit dataset > Submit high-throughput sequencing (HTS)
-# https://www.ncbi.nlm.nih.gov/geo/info/submissionftp.html
-# get that:
-#    1. personalized upload space uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX
-#    2. host address	ftp-private.ncbi.nlm.nih.gov
-#    3. username	geoftp
-#    4. password	XXXpasswrdXXX
-# from your screen on cargo:
-personalized_upload_space="uploads/florent.chuffart@univ-grenoble-alpes.fr_XXXHASHXXX"
-host_address="ftp-private.ncbi.nlm.nih.gov"
-username="geoftp"
-password="XXXpasswrdXXX"
-cd /bettik/chuffarf/geo_submission/${project}/
-lftp -e "mirror -R ${gse} ${personalized_upload_space}/${gse} " -u ${username},${password} ${host_address}
-# then Upload metadata file in https://submit.ncbi.nlm.nih.gov/geo/submission/meta/
+dict_cell_type = c(
+  P="Pachytene spermatocyte",
+  R="Round spermatid",
+  C="Condensed spermatid",
+  S="Spermatozoa"
+)
+
+
+
+samples$sample_name            = substr(samples[,2], 1, 14)
+rownames(samples) = samples$sample_name
+samples$title                  = samples$sample_name
+samples$library_strategy       = "RNA-Seq"
+samples$organism               = "Mus musculus"
+samples$tissue                 = "testis"
+samples$cell_line              = ""
+samples$cell_type              = dict_cell_type[substr(rownames(samples), 1, 1)]
+samples$genotype               = dict_genotype  [substr(rownames(samples), 3, 9)]
+samples$treatment              = ""
+samples$batch                  = ""
+samples$molecule               = c("polyA RNA", "total RNA", "genomic DNA")[1]
+samples$genotype               = c("single", "paired-end")[1]
+samples$instrument_model       = c("Illumina NextSeq 500", "Illumina NovaSeq 6000")[2]
+samples$description            = ""
+
+samples$processed_data_file    = samples[,2]
+samples$processed_data_file    = ""
+samples$raw_file1              = paste0(samples$sample_name, "_R1.fastq.gz")
+samples$raw_file2              = ""
+samples$raw_file3              = ""
+samples$raw_file4              = ""
+
+samples = samples[,-(1:2)] 
+samples
+head(samples)
+WriteXLS::WriteXLS(samples, "01_samples.xlsx")
+
+
+
+
+
+
+
+proc_data_files = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/counts/md5.geo.txt"))
+head(proc_data_files)
+dim(proc_data_files)
+
+proc_data_files$filename = proc_data_files[,2]
+proc_data_files$checksum = proc_data_files[,1]
+proc_data_files$filetype = "counts"
+
+proc_data_files = proc_data_files[,-(1:2)] 
+proc_data_files
+WriteXLS::WriteXLS(proc_data_files, "02_proc_data_files.xlsx")
+
+
+
+
+
+
+
+
+raw_files = read.table(paste0("/bettik/chuffarf/geo_submission/", project, "/", gse, "/fastq/md5.geo.txt"))
+head(raw_files)
+dim(raw_files)
+
+raw_files$filename =         raw_files[,2]
+raw_files$checksum =         raw_files[,1]
+raw_files$filetype =         "fastq"
+
+raw_files = raw_files[,-(1:2)] 
+raw_files
+WriteXLS::WriteXLS(raw_files, "03_raw_files.xlsx")
+
+
+
+
+
+
+
+
+
+
+
+
+
+paired_end_experiments = rbind(
+  data.frame(filename1=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L1_R1.fastq.gz"), filename2=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L1_R2.fastq.gz")),
+  data.frame(filename1=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L2_R1.fastq.gz"), filename2=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L2_R2.fastq.gz")),
+  data.frame(filename1=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L3_R1.fastq.gz"), filename2=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L3_R2.fastq.gz")),
+  data.frame(filename1=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L4_R1.fastq.gz"), filename2=paste0(substr(rownames(samples), 1, 1), "_", substr(rownames(samples), 8, 14), "_L4_R2.fastq.gz"))
+)
+
+head(paired_end_experiments)
+WriteXLS::WriteXLS(paired_end_experiments, "04_paired_end_experiments.xlsx")
+
 
 
 
