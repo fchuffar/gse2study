@@ -7,6 +7,8 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
   files = [x.replace(src_suffix, dest_suffix) for x in files ]
   return [os.path.join(os.path.expanduser(dest_dir), f) for f in files]
 
+fastqext=".fastq.gz"
+# fastqext=".fq.gz"
 
 localrules: target
 
@@ -15,16 +17,16 @@ rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
-      fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", ".fastq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
+      fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", fastqext, "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
       # star_index = directory(os.path.expanduser("~/projects/datashare/genomes/"+species+"/{annotation}/"+version+"/Sequence/StarIndex")),
       # fqc_files    = get_files("~/projects/datashare/"+gse+"/raw", ".fq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
       # blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_telocentro.unmapblasted.txt.gz"),
       bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out.bam"),
       # bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
       # bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
-      # ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
-      ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
-      # rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
+      ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
+      # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
+      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \
@@ -36,7 +38,7 @@ multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_no
 echo workflow \"align_heatshock\" completed at `date` 
           """
 rule fastqc:
-    input:  fastqgz="{path}/raw/{prefix}.fastq.gz"
+    input:  fastqgz="{path}/raw/{prefix}"+fastqext
     output: zip="{path}/raw/{prefix}_fastqc.zip",
             html="{path}/raw/{prefix}_fastqc.html"
     threads: 1
