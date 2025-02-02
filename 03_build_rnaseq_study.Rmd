@@ -14,8 +14,8 @@ output:
 ```{r, echo=FALSE, eval=TRUE}
 knitr::opts_chunk$set(collapse=TRUE, comment = "#>", fig.width=9, fig.height=6, eval=TRUE, echo=FALSE, results="hide")
 source("config")
-genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
-study_filename = paste0("study_", gse, "_", version, ".rds")
+genes = readRDS(paste0("~/projects/genes/bed_", genome_version, "_epimeddb.rds"))
+study_filename = paste0("study_", gse, "_", genome_version, ".rds")
 ```
 # Material and Methods
 
@@ -37,7 +37,7 @@ Stranded paired-end 2x75bp reads were produced by Illumina NextSeq500.
 
 ## Alignment
 
-The fastq files were aligned on the `r annotation` `r version` genome using `STAR` (2.7.1a) [PMID:23104886] to produce bam files.
+The fastq files were aligned on the `r annotation` `r genome_version` genome using `STAR` (2.7.1a) [PMID:23104886] to produce bam files.
 
 ## Counts
 
@@ -75,7 +75,7 @@ head(desq2_outputs)
 Data matrix is compute from fastq files:
 
   * from study `r gse`
-  * aligned on `r species    ` `r version    ` `r annotation ` genome using STAR
+  * aligned on `r species    ` `r genome_version    ` `r annotation ` genome using STAR
   * counts are computed using `htseq-count`
   * normalization is done by DESeq2.
   
@@ -88,7 +88,7 @@ It also includes following matrix of counts:
   
 ```{r}
 print("# build raw counts")
-count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"), full.names=TRUE)  
+count_files = list.files(paste0("~/projects/datashare/", gse), paste0("notrim_star_", species, "_", annotation, "_", genome_version, "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"), full.names=TRUE)  
 if (!file.exists("raw_counts.rds")) {
   raw_counts = sapply(unlist(count_files), function(cnt_filename){
     foo = read.table(cnt_filename)
