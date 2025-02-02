@@ -1,7 +1,7 @@
 gse="rnaseq_lafage_icm"
 project="brain"
 species="Mus_musculus"
-version="mm10"
+genome_version="mm10"
 annotation="UCSC"
 gtf_prefix="geneswchrm" 
 datashare="datashare"
