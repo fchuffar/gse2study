@@ -38,18 +38,27 @@ Base calling was performed XXX.
 
 Stranded paired-end 2x75bp reads were produced by Illumina NextSeq500. 
 
+**Data**
+
+Transcriptomic data  were obtained from EGA study EGAS00001000925, EGA dataset EGAD00001001244: 118 paired .fastq files corresponding to 59 patients.
+Clinical data were obtained from [PMID: 26168399] supplementals (`41586_2015_BFnature14664_MOESM72_ESM.xlsx` file)
+
 **Alignment**
 
-The sequenced reads from the raw sequence (.fastq files) were aligned on the UCSC mm10 genome using the STAR software (2.7.1a) (Dobin et al. 2013) [PMID:23104886] to produce bam files.
+The sequenced reads from the raw sequence (.fastq files) were aligned on the `r annotation` `r genome_version` `r species` genome using the STAR software (2.7.1a) (Dobin et al. 2013) [PMID:23104886] to produce bam files.
 
 **Counts**
 
 The aligned reads (.bam files) were counted using HTSeq framework (0.11.2) (Anders et al. 2015) [PMID:25260700], with options: -t exon -f bam -r pos --stranded=`r strand` -m intersection-strict --nonunique none
 
+**Normalization**
 
-**Normalization and differential analysis**
+The normalization, were performed using the `r version$version.string` [R Core Team. R: A language and environment for statistical computing. Vienna, Austria: R Foundation for Statistical Computing, 2017], DESeq2 (`r packageVersion("DESeq2")`) (Anders and Huber 2010; Love et al. 2014) [PMID:20979621, PMID:25516281] and SARTools (`r packageVersion("SARTools")`) (Varet et al. 2016) [PMID:27280887] packages.
 
-The normalization, pseudo-log transformation of the read counts, and the differential analyses were performed using the R software [R Core Team. R: A language and environment for statistical computing. Vienna, Austria: R Foundation for Statistical Computing, 2017], DESeq2 (1.22.2) (Anders and Huber 2010; Love et al. 2014) [PMID:20979621, PMID:25516281] and SARTools (Varet et al. 2016) [PMID:27280887] packages.
+
+**Differential analysis**
+
+XXX
 
 **Grouping genes/features according to their quartile of expression**
 
