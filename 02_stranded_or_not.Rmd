@@ -43,12 +43,12 @@ We plot characterization of reads `reverse` and reads `yes` with boxplot.
   
 ```{r}
 print("# stranded or not?")
-re_filenames = list.files(paste0("~/projects/datashare/", gse, "/"), paste0("*_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt"))
-ye_filenames = list.files(paste0("~/projects/datashare/", gse, "/"), paste0("*_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"))
+re_filenames = list.files(paste0("~/projects/datashare/", gse, "/"), paste0("*_notrim_star_", species, "_", annotation, "_", genome_version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt"))
+ye_filenames = list.files(paste0("~/projects/datashare/", gse, "/"), paste0("*_notrim_star_", species, "_", annotation, "_", genome_version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"))
 gsm = intersect(do.call(rbind, strsplit(re_filenames, "_notrim_star_"))[,1], do.call(rbind, strsplit(ye_filenames, "_notrim_star_"))[,1])
 gsm
-re_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt")
-ye_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    )
+re_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", genome_version, "_", gtf_prefix, "_strandedreverse_classiccounts.txt")
+ye_filenames = paste0("~/projects/datashare/", gse, "/", gsm, "_notrim_star_", species, "_", annotation, "_", genome_version, "_", gtf_prefix, "_strandedyes_classiccounts.txt"    )
 foo_re = read.table(re_filenames)[,2]
 foo_ye = read.table(ye_filenames)[,2]
 layout(matrix(1:2, 1), respect=TRUE)
