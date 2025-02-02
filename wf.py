@@ -12,25 +12,24 @@ fastqext=".fastq.gz"
 
 localrules: target
 
-foo=version # patch for bug in target shell
 rule target:
     threads: 1
     message: "-- Rule target completed. --"
     input: 
       fastqc_files = get_files("~/projects/datashare/"+gse+"/raw", fastqext, "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
-      # star_index = directory(os.path.expanduser("~/projects/datashare/genomes/"+species+"/{annotation}/"+version+"/Sequence/StarIndex")),
+      # star_index = directory(os.path.expanduser("~/projects/datashare/genomes/"+species+"/{annotation}/"+genome_version+"/Sequence/StarIndex")),
       # fqc_files    = get_files("~/projects/datashare/"+gse+"/raw", ".fq.gz", "~/projects/datashare/"+gse+"/raw", "_fastqc.zip"),
-      # blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_telocentro.unmapblasted.txt.gz"),
-      bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out.bam"),
-      # bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
-      # bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
-      ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
-      # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
-      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
+      # blastn_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_telocentro.unmapblasted.txt.gz"),
+      bam_files    = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out.bam"),
+      # bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
+      # bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
+      ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
+      # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
+      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \
-  ~/projects/datashare/"""+gse+"""/*_notrim_star_"""+species+"""_"""+foo+"""_Log.final.out \
+  ~/projects/datashare/"""+gse+"""/*_notrim_star_"""+species+"""_"""+genome_version+"""_Log.final.out \
   ~/projects/datashare/"""+gse+"""/raw/*_fastqc.zip \
   ~/projects/datashare/"""+gse+"""/raw/*_screen.txt \
   
@@ -72,9 +71,9 @@ sickle  pe -g\
 
 rule index_genome:
     input:
-      genome_fasta=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/WholeGenomeFasta/genome.fa"), 
-      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Annotation/Genes/"+gtf_prefix+".gtf"),
-    output: directory(os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/StarIndex"))
+      genome_fasta=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Sequence/WholeGenomeFasta/genome.fa"), 
+      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Annotation/Genes/"+gtf_prefix+".gtf"),
+    output: directory(os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Sequence/StarIndex"))
     #priority: 0
     threads: 32
     shell:    """
@@ -94,10 +93,10 @@ rule align_trimed:
       # fqgz_file="{prefix}/{sample}_{trim}.fastq.gz",
       # fastqc_file="{prefix}/{sample}_{trim}_fastqc.zip",
       fastqc_info="{prefix}/{sample}_{trim}_fqgz.info",
-      star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Sequence/StarIndex"),
-      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Annotation/Genes/"+gtf_prefix+".gtf"),
+      star_index=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Sequence/StarIndex"),
+      gtf=os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Annotation/Genes/"+gtf_prefix+".gtf"),
     output:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.bam"
     threads: 32
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
@@ -108,20 +107,20 @@ STAR \
   --sjdbGTFfile {input.gtf} \
   --readFilesCommand gunzip -c \
   --readFilesIn `cat {input.fastqc_info}` \
-  --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_ \
+  --outFileNamePrefix {wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.genome_version}_ \
   --outSAMtype BAM Unsorted
-samtools sort {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam -o {output.bam_file}
-rm {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_Aligned.out.bam
+samtools sort {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.genome_version}_Aligned.out.bam -o {output.bam_file}
+rm {wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.genome_version}_Aligned.out.bam
 samtools index {output.bam_file}
     """
               
 rule count_classic:
     input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam",
-      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Annotation/Genes/{gtf_prefix}.gtf")
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.bam",
+      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Annotation/Genes/{gtf_prefix}.gtf")
     output: 
-      txt_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt",
-      end_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_{gtf_prefix}_stranded{stranded}_classiccounts.end"
+      txt_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_{gtf_prefix}_stranded{stranded}_classiccounts.txt",
+      end_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_{gtf_prefix}_stranded{stranded}_classiccounts.end"
     priority: 50
     threads: 2
     shell:"""
@@ -135,9 +134,9 @@ touch {output.end_file}
 
 rule count_rmdup_stranded:
     input:
-      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.rmdup.bam",
-      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{version}/Annotation/Genes/{gtf_prefix}.gtf")
-    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_{gtf_prefix}_stranded{stranded}_rmdupcounts.txt"
+      bam_file="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.rmdup.bam",
+      gtf_file= os.path.expanduser("~/projects/datashare/genomes/{species}/{annotation}/{genome_version}/Annotation/Genes/{gtf_prefix}.gtf")
+    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_{gtf_prefix}_stranded{stranded}_rmdupcounts.txt"
     priority: 50
     threads: 1
     shell:"""
@@ -152,8 +151,8 @@ htseq-count -t exon -f bam -r pos --stranded={wildcards.stranded} -m intersectio
 
 
 rule rmdup_bam:
-    input: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.rmdup.bam"
+    input: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.bam",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.rmdup.bam"
     threads: 4
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
@@ -164,7 +163,7 @@ java -Djava.io.tmpdir={wildcards.prefix}/tmp -jar /summer/epistorage/miniconda3/
   I={input} \
   O={output} \
   REMOVE_DUPLICATES=TRUE \
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.version}_output.metrics  2>&1>/dev/null
+  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M={wildcards.prefix}/{wildcards.sample}_{wildcards.trim}_star_{wildcards.species}_{wildcards.genome_version}_output.metrics  2>&1>/dev/null
 samtools index {output}
     """
 
@@ -172,8 +171,8 @@ samtools index {output}
 
 
 rule bigwig_coverage:
-    input:  "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out.bam",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Aligned.sortedByCoord.out_{norm}_{mmq}_{binsize}.bw"
+    input:  "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out.bam",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Aligned.sortedByCoord.out_{norm}_{mmq}_{binsize}.bw"
     threads: 4
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
@@ -214,8 +213,8 @@ blastn -db {input.blast_db} -num_threads=1 -query - -outfmt "10 std sstrand" -ev
 rule blastn_unmapped_ggaat:
     input:
       blast_db=os.path.expanduser("~/projects/heatshock/data/{subject}.blast.db"),
-      query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_Unmapped.out.mate1.gz",
-    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{version}_{subject}.unmapblasted.txt.gz"
+      query_fqgz="{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_Unmapped.out.mate1.gz",
+    output: "{prefix}/{sample}_{trim}_star_{species}_{annotation}_{genome_version}_{subject}.unmapblasted.txt.gz"
     threads: 1
     shell:"""
 export PATH="/summer/epistorage/miniconda3/envs/rnaseq_env/bin:$PATH"
