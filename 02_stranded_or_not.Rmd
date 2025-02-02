@@ -22,7 +22,7 @@ source("config")
 Data matrix is compute from fastq files:
 
   * from study `r gse`
-  * aligned on `r species    ` `r version    ` `r annotation ` genome using STAR
+  * aligned on `r species    ` `r genome_version    ` `r annotation ` genome using STAR
   * counts are computed using `htseq-count`
   * normalization is done by DESeq2.
 
