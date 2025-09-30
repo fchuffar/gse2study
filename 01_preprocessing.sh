@@ -19,7 +19,7 @@ echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 # ## preprocessing it...
 # cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep RUN > ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab
 # cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep GSE > ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab
-sra=`cat ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab | grep ${gse} | cut -f1 | grep SRA`
+sra=`cat ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab | grep ${gse} | cut -f2 | grep SRA`
 echo $sra
 if [[ -f ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab ]]; then
    echo "File ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab exists."
