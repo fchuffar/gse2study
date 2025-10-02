@@ -1,5 +1,5 @@
-project="cometh"
-gse="rnaseq_cometh_lot1"
+project="atacclock"
+gse="GSE193141"
 species="Homo_sapiens"
 annotation="UCSC"
 genome_version="hg38"

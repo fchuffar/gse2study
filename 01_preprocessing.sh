@@ -1,4 +1,4 @@
-cd ~/projects/meth3d/results/GSE45332
+cd ~/projects/atacclock/results/GSE193141
 source config
 echo $gse
 echo $project
@@ -15,18 +15,21 @@ rsync -auvP ~/projects/${project}/results/${gse}/ cargo:~/projects/${project}/re
 # data description
 echo https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=${gse}
 # ## download NCBI/SRA db
-# wget https://ftp.ncbi.nlm.nih.gov/sra/reports/Metadata/SRA_Accessions.tab
+# wget https://ftp.ncbi.nlm.nih.gov/srp/reports/Metadata/SRA_Accessions.tab
 # ## preprocessing it...
 # cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep RUN > ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab
 # cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRA | grep GSE > ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab
-sra=`cat ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab | grep ${gse} | cut -f2 | grep SRA | uniq`
-echo $sra
-if [[ -f ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab ]]; then
-   echo "File ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab exists."
+# cat ~/projects/datashare/platforms/SRA_Accessions.tab | grep SRP | grep GSE > ~/projects/datashare/platforms/SRA_Accessions_SRP_GSE.tab
+# sra=`cat ~/projects/datashare/platforms/SRA_Accessions_SRA_GSE.tab | grep ${gse} | cut -f2 | grep SRA | uniq`
+srp=`cat ~/projects/datashare/platforms/SRA_Accessions_SRP_GSE.tab | grep ${gse} | cut -f1 | grep SRP | uniq`
+echo $srp
+if [[ -f ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab ]]; then
+   echo "File ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab exists."
 else
-  cat ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab | grep ${sra} > ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab
+  # cat ~/projects/datashare/platforms/SRA_Accessions_SRA_RUN.tab | grep ${sra} > ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab
+  cat ~/projects/datashare/platforms/SRA_Accessions_SRP_RUN.tab | grep ${srp} > ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab
 fi
-srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${sra} | cut -f1 | grep SRR`
+srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${srp} | cut -f1 | grep SRR`
 echo $srrs
 echo $srrs | wc
 
@@ -34,7 +37,7 @@ mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
 
 source ~/conda_config.sh
-conda activate sra_env
+conda activate srp_env
 echo "checking" $srrs >> checking_srrs_report.txt
 for srr in $srrs
 do
@@ -47,16 +50,23 @@ do
      # status=$?
      # ## take some decision ##
      # [ $status -ne 0 ] && echo "$srr check failed" || echo "$srr ok" >> checking_srrs_report.txt
-     # # parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-     # # /summer/epistorage/fchuffar/miniconda3.save/envs/oct22_env/bin/parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-     # # fastq-dump --gzip --split-files --outdir ./ --sra-id ${srr}
+     # # parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --srp-id ${srr}
+     # # /summer/epistorage/fchuffar/miniconda3.save/envs/oct22_env/bin/parallel-fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --srp-id ${srr}
+     # # fastq-dump --gzip --split-files --outdir ./ --srp-id ${srr}
      # #
-     # # fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --sra-id ${srr}
-     fasterq-dump --threads 16 -p --temp . --split-files --outdir ./ ${srr}
+     # # fastq-dump --threads 16 --tmpdir /dev/shm --gzip --split-files --outdir ./ --srp-id ${srr}
+    #  fasterq-dump --threads 16 -p --temp . --split-files --outdir ./ ${srr}
+    url1=ftp://ftp.sra.ebi.ac.uk/vol1/fastq/`echo ${srr} | cut -c1-6`/0`echo ${srr} | rev | cut -c1-2 | rev`/${srr}/${srr}_1.fastq.gz
+    url2=ftp://ftp.sra.ebi.ac.uk/vol1/fastq/`echo ${srr} | cut -c1-6`/0`echo ${srr} | rev | cut -c1-2 | rev`/${srr}/${srr}_2.fastq.gz
+    wget -nc ${url1}
+    wget -nc ${url2}
   fi
 done
 cat checking_srrs_report.txt
-gzip *.fastq
+# for fq in `ls *.fastq`
+# do
+#   gzip ${fq} &
+# done
 
 # SR or PE?
 ls -lha ~/projects/datashare/${gse}/raw
@@ -68,14 +78,14 @@ fi
 echo $sequencing_read_type
 
 ## metadata linking sample and raw files
-gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${sra} | cut -f10 | cut -f1 -d_ | uniq`
+gsms=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${srp} | cut -f10 | cut -f1 -d_ | uniq`
 echo $gsms
 echo $gsms | wc
 cd ~/projects/datashare/${gse}/
 for gsm in $gsms
 do
   echo ${gsm}  
-  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${sra}.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
+  srrs=`cat ~/projects/datashare/platforms/SRA_Accessions_${srp}.tab | grep RUN | grep ${gsm} | cut -f1 | grep SRR | sort`
   echo ${srrs}    
   if [[ $sequencing_read_type == PE ]]; then
     # PE
@@ -91,10 +101,19 @@ cat *.info
 
 
 
+
+
+
+
+
 # If not from NCCBI/GEO, organize your raw files in datashare
 mkdir -p ~/projects/datashare/${gse}/raw
 cd ~/projects/datashare/${gse}/raw
 # ... edit and bash design.sh
+
+
+
+
 
 
 
