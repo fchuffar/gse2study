@@ -24,7 +24,7 @@ rule target:
       # bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
       # bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
       ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
-      # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
+      ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
       rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
 
     shell:"""

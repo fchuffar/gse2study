@@ -133,7 +133,7 @@ RCODE="rmarkdown::render('02_stranded_or_not.Rmd')"
 
 # DA reporting
 cd 04_deseq2
-mate ../design.R
+open ../design.R
 RCODE="source('da_report.R')"
 (echo $RCODE | Rscript - 2>&1) > da_report.Rout
 

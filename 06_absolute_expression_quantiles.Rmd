@@ -19,7 +19,7 @@ source("config")
 
 
 ```{r define quantiles, results="verbatim"}
-genes = readRDS(paste0("~/projects/genes/bed_", version, "_epimeddb.rds"))
+genes = readRDS(paste0("~/projects/genes/bed_", genome_version, "_epimeddb.rds"))
 genes = genes[genes$type %in% "protein-coding",]
 dim(genes)
 
