@@ -7,8 +7,9 @@ def get_files(src_dir, src_suffix, dest_dir, dest_suffix):
   files = [x.replace(src_suffix, dest_suffix) for x in files ]
   return [os.path.join(os.path.expanduser(dest_dir), f) for f in files]
 
-fastqext=".fastq.gz"
-# fastqext=".fq.gz"
+# fastqext=".fastq.gz"
+fastqext=".fq.gz"
+
 
 localrules: target
 
@@ -24,8 +25,8 @@ rule target:
       # bw0_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_0_4.bw"),
       # bw30_files     = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_Aligned.sortedByCoord.out_RPKM_30_4.bw"),
       ycount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedyes_classiccounts.txt")[1] ,
-      ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
-      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt")[1],
+      # ncount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedno_classiccounts.txt"),
+      rcount_files = get_files("~/projects/datashare/"+gse, "_notrim_fqgz.info", "~/projects/datashare/"+gse, "_notrim_star_"+species+"_"+annotation+"_"+genome_version+"_"+gtf_prefix+"_strandedreverse_classiccounts.txt"),
 
     shell:"""
 multiqc --force -o ~/projects/"""+project+"""/results/"""+gse+"""/ -n multiqc_notrim \

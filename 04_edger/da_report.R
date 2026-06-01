@@ -22,7 +22,7 @@ targetFile <- "design.txt"                           # path to the design/target
 write.table(
   cbind(data.frame(
           label = design$gsm,
-          files = paste0(design$gsm, "_notrim_star_", species, "_", annotation, "_", version , "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"),
+          files = paste0(design$gsm, "_notrim_star_", species, "_", annotation, "_", genome_version , "_", gtf_prefix, "_stranded", strand, "_classiccounts.txt"),
           stringsAsFactors=FALSE
         ), design), 
   targetFile,sep=" ", quote=FALSE, row.names=FALSE
