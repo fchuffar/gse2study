@@ -78,3 +78,4 @@ password="XXXpasswrdXXX"
 cd /bettik/chuffarf/geo_submission/${project}/
 lftp -e "mirror -R ${gse} ${personalized_upload_space}/${gse} " -u ${username},${password} ${host_address}
 # then Upload metadata file in https://submit.ncbi.nlm.nih.gov/geo/submission/meta/
+# Thank you for taking the time to review our dataset submission. We appreciate your help and the work you’re doing to make these data available. Hopefully everything will be in order and the dataset will be online soon. Thanks again.
