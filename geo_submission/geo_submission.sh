@@ -1,4 +1,4 @@
-cd ~/projects/lfs_patients_fibroblast/results/rnaseq_lfs2_icm
+cd ~/projects/lfs_patients_fibroblast/results/rnaseq_lfs3_integragen
 source config
 echo $gse
 echo $project
@@ -42,25 +42,23 @@ md5sum *.txt > ${MD5GEOcntFILE}
 ls -lha /bettik/chuffarf/geo_submission/${project}/
 ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/
 ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/fastq/
-
+ls -lha /bettik/chuffarf/geo_submission/${project}/${gse}/counts/
 
 # Put metadata
 source ~/conda_config.sh 
 conda activate rnaseq_env
 cd ~/projects/${project}/results/${gse}/geo_submission
 Rscript generate_metadata.R 
+echo "rmarkdown::render('../10_material_and_methods.Rmd')" | Rscript -
 
 rsync -auvP cargo:~/projects/${project}/results/${gse}/geo_submission/0*_*.xlsx ~/projects/${project}/results/${gse}/geo_submission/.
+rsync -auvP cargo:~/projects/${project}/results/${gse}/10_material_and_methods.html ~/projects/${project}/results/${gse}/.
 
 
 # localy 
 cd ~/projects/${project}/results/${gse}/geo_submission
 # wget https://www.ncbi.nlm.nih.gov/geo/info/examples/seq_template.xlsx
-# Afin que de proceder au dépôt des données et obtenir le numéro d'accession (GSE) ainsi que le code d'accès destiné aux reviewers, il faut completer, dans le fichier seq_template.xlsx, les sections STUDY et PROTOCOLS.
 open seq_template.xlsx
-
-
-rsync -auvP seq_template.xlsx cargo:/bettik/chuffarf/geo_submission/${project}/${gse}/.
 
 # Put on GEO
 # Login in # https://www.ncbi.nlm.nih.gov/geo/info/seq.html
