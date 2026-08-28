@@ -8,32 +8,44 @@ splits = do.call(rbind, strsplit(samples[,2], "_"))
 head(splits[,1:6])
 
 tissue_dict=c(
+  IN = "intestin",
+  LG = "lung",
+  LV = "liver",
+  BN = "bone",
+  MR = "bone marrow",
+  MS = "muscle",
+  SP = "spleen",
+  NULL  
+)
+background_dict=c(
+  g172 = "Trp53 R172H Mut", # (mutation sur le codon 172 de Trp53) (https://www.jax.org/strain/008183)
+  g270 = "Trp53 R270H Mut", # (mutation sur le codon 270 de Trp53) (https://www.jax.org/strain/008182)
   NULL  
 )
 genotype_dict=c(
-  NULL  
-)
-treatment_dict=c(
+  WT = "Trp53 WT/WT",
+  MU = "Trp53 WT/Mut",
   NULL  
 )
 
 samples$sample_name =         apply(splits[,1:4], 1, paste0, collapse="_") # substr(samples[,2], 1, 23)
 samples$title =               samples$sample_name
 samples$organism =            species
-samples$tissue  =             split[,1]
-# samples$cell_line  =             split[,3]
-# samples$cell_type  =             split[,3]
-samples$genotype =            split[,2]
-samples$treatment =           split[,3]
+samples$tissue  =             tissue_dict[splits[,2]]
+# samples$cell_line  =             splits[,3]
+# samples$cell_type  =             splits[,3]
+samples$genotype =            genotype_dict[splits[,3]]
+# samples$treatment =           treatment_dict[splits[,1]]
+samples$background =          background_dict[splits[,1]]
 # samples$batch =             substr(samples[,2], 20, 23)
-samples$replicate =           split[,4]
+samples$replicate =           splits[,4]
 
 samples$processed_data_file = samples[,2]
-samples$raw_file1 =           paste0(samples$sample_name, "_1.fastq.gz")
-samples$raw_file2 =           paste0(samples$sample_name, "_2.fastq.gz")
+samples$raw_file1 =           paste0(samples$sample_name, "_R1.fastq.gz")
+samples$raw_file2 =           paste0(samples$sample_name, "_R2.fastq.gz")
 
 samples = samples[,-(1:2)] 
-head(samples)
+head(samples[,1:6])
 WriteXLS::WriteXLS(samples, "01_samples.xlsx")
 
 
@@ -78,7 +90,7 @@ WriteXLS::WriteXLS(raw_files, "03_raw_files.xlsx")
 
 
 
-paired_end_experiments = data.frame(filename1=paste0(samples$sample_name, "_R1.fastq.gz"), filename2=paste0(samples$sample_name, "_R2.fastq.gz"))
+paired_end_experiments = data.frame(filename1=samples$raw_file1, filename2=samples$raw_file2)
 head(paired_end_experiments)
 WriteXLS::WriteXLS(paired_end_experiments, "04_paired_end_experiments.xlsx")
 
