@@ -1,4 +1,12 @@
-cd ~/projects/atacclock/results/GSE193141
+# 00. cp 01_preprocessing.sh to customize it
+cp 01_preprocessing.sh 01_custom_preprocessing.sh
+open 01_custom_preprocessing.sh
+
+# 0. copy the correct config.XXX file
+cp config.t2t config
+
+# 1. workdir
+cd ~/projects/nme2/results/rnaseq_charlene_tgml
 source config
 echo $gse
 echo $project
